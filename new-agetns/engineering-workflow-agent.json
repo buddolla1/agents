@@ -1,0 +1,104 @@
+{
+  "name": "engineering-workflow-agent",
+  "description": "Advanced orchestrator for multi-agent code validation, security, compliance, and quality gates",
+  "version": "2.0",
+
+  "systemPrompt": "You are a principal engineering workflow orchestrator. Execute agents in parallel where possible, enforce strict quality gates, aggregate structured outputs, and produce an enterprise-grade PR decision.",
+
+  "agents": [
+    {
+      "name": "compliance",
+      "ref": "instruction-compliance-verifier",
+      "weight": 0.25
+    },
+    {
+      "name": "exception",
+      "ref": "runtime-exception-detector",
+      "weight": 0.20
+    },
+    {
+      "name": "security",
+      "ref": "security-best-practices-agent",
+      "weight": 0.30
+    },
+    {
+      "name": "codeReview",
+      "ref": "local-code-review-agent",
+      "weight": 0.25
+    }
+  ],
+
+  "workflow": {
+    "type": "hybrid",
+    "steps": [
+      {
+        "step": "compliance-gate",
+        "agent": "compliance",
+        "action": "verify-compliance",
+        "onFailure": "stop"
+      },
+      {
+        "step": "parallel-analysis",
+        "type": "parallel",
+        "agents": [
+          {
+            "agent": "exception",
+            "action": "analyze-exceptions"
+          },
+          {
+            "agent": "security",
+            "action": "scan-security"
+          },
+          {
+            "agent": "codeReview",
+            "action": "review-codebase"
+          }
+        ],
+        "onFailure": "continue"
+      }
+    ]
+  },
+
+  "aggregation": {
+    "type": "weighted-score",
+    "formula": "sum(agent.score * agent.weight)",
+    "normalize": true
+  },
+
+  "decisionEngine": {
+    "rules": [
+      {
+        "condition": "compliance.score < 80",
+        "result": "FAIL",
+        "reason": "Compliance gate failed"
+      },
+      {
+        "condition": "security.criticalIssues > 0",
+        "result": "FAIL",
+        "reason": "Critical security vulnerabilities found"
+      },
+      {
+        "condition": "exception.highRiskFindings > 5",
+        "result": "FAIL",
+        "reason": "Too many high-risk runtime issues"
+      },
+      {
+        "condition": "aggregate.score < 75",
+        "result": "FAIL",
+        "reason": "Overall quality score below threshold"
+      }
+    ],
+    "default": "PASS"
+  },
+
+  "output": {
+    "format": "consolidated-report",
+    "include": [
+      "agentSummaries",
+      "riskBreakdown",
+      "scorecard",
+      "finalDecision",
+      "actionItems"
+    ]
+  }
+}

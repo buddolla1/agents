@@ -1,0 +1,13 @@
+{
+  "id": "react-ada-orchestrator",
+  "type": "orchestrator",
+  "agents": [
+    { "id": "parser-agent" },
+    { "id": "a11y-agent" },
+    { "id": "report-agent" }
+  ],
+  "flow": [
+    { "from": "parser-agent", "to": "a11y-agent" },
+    { "from": "a11y-agent", "to": "report-agent" }
+  ]
+}

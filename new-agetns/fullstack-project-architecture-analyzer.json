@@ -1,0 +1,111 @@
+{
+  "name": "Full-Stack Project Architecture Analyzer",
+  "id": "fullstack-project-architecture-analyzer",
+  "description": "Analyzes React, Spring Boot, or combined React + Spring Boot projects and generates architecture with HLD, LLD, components, and flowcharts in Markdown.",
+  "version": "1.0",
+  "triggers": ["manual", "on_project_open"],
+  "input": {
+    "type": "folder",
+    "description": "Root folder of the project to analyze"
+  },
+  "user_interaction": {
+    "description": "Select project type for analysis",
+    "type": "choice",
+    "options": [
+      {
+        "label": "React",
+        "value": "react"
+      },
+      {
+        "label": "Spring Boot",
+        "value": "springboot"
+      },
+      {
+        "label": "Full Stack (React + Spring Boot)",
+        "value": "fullstack"
+      }
+    ]
+  },
+  "output": {
+    "type": "file",
+    "format": "markdown",
+    "file_name": "Architecture.md",
+    "description": "Generated project architecture with diagrams and flowcharts"
+  },
+  "instructions": [
+    {
+      "role": "system",
+      "content": "You are an AI project architecture analyzer. Based on the selected project type, scan the project and generate architecture diagrams, component/module lists, and flowcharts. \n\n- For React projects: detect components, hooks, context, pages, services, and routes.\n- For Spring Boot projects: detect controllers, services, repositories, entities, DTOs, and REST endpoints.\n- For full-stack projects: combine React frontend and Spring Boot backend architecture, mapping API calls from frontend to backend."
+    },
+    {
+      "role": "user",
+      "content": "Analyze the project and generate:\n1. HLD diagram\n2. LLD diagrams\n3. Flowcharts for main processes and user actions / API calls\n4. Component/module list with responsibilities\nOutput all in Markdown with Mermaid diagrams."
+    }
+  ],
+  "skills": [
+    {
+      "name": "project_scanner",
+      "description": "Recursively scans project files based on selected mode: React (.js/.jsx/.ts/.tsx), Spring Boot (.java, resources), or both."
+    },
+    {
+      "name": "dependency_analyzer",
+      "description": "Analyzes relationships between components, hooks, context, services, controllers, repositories, and entities depending on project type."
+    },
+    {
+      "name": "process_flow_extractor",
+      "description": "Identifies user actions, API flows, backend processes, database interactions, and state updates for flowcharts."
+    },
+    {
+      "name": "diagram_generator",
+      "description": "Generates Mermaid diagrams for HLD, LLD, and flowcharts tailored to project type."
+    },
+    {
+      "name": "markdown_writer",
+      "description": "Writes all diagrams, flows, and components into Architecture.md"
+    }
+  ],
+  "workflow": [
+    {
+      "step": "scan_project",
+      "skill": "project_scanner",
+      "description": "Scan project files and detect components, hooks, pages, services, routes (React), or controllers, services, repositories, entities (Spring Boot)."
+    },
+    {
+      "step": "analyze_dependencies",
+      "skill": "dependency_analyzer",
+      "description": "Map relationships between frontend and/or backend modules and services."
+    },
+    {
+      "step": "extract_process_flows",
+      "skill": "process_flow_extractor",
+      "description": "Detect user interactions, API calls, backend flows, and database operations."
+    },
+    {
+      "step": "generate_diagrams",
+      "skill": "diagram_generator",
+      "description": "Generate HLD, LLD, and flowcharts in Mermaid syntax, adjusted for selected project type."
+    },
+    {
+      "step": "create_markdown",
+      "skill": "markdown_writer",
+      "description": "Compile all diagrams, flows, and component/module details into Architecture.md."
+    }
+  ],
+  "settings": {
+    "mermaid_enabled": true,
+    "generate_flowcharts": true,
+    "include_component_details": true,
+    "framework_mode": "react",
+    "scan_patterns": {
+      "react": ["src/**/*.{js,jsx,ts,tsx}", "components/**/*", "pages/**/*", "services/**/*", "hooks/**/*"],
+      "springboot": ["src/main/java/**/*.{java}", "src/main/resources/**/*"],
+      "fullstack": ["src/**/*.{js,jsx,ts,tsx}", "components/**/*", "pages/**/*", "services/**/*", "hooks/**/*", "src/main/java/**/*.{java}", "src/main/resources/**/*"]
+    },
+    "exclude_patterns": ["node_modules/**/*"]
+  },
+  "metadata": {
+    "category": "project_analysis",
+    "compatible_with": ["VS Code Copilot", "JetBrains Copilot"],
+    "output_preview": true
+  }
+}

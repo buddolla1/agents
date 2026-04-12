@@ -1,0 +1,37 @@
+{
+  "name": "React ADA A2A System",
+  "id": "react-ada-a2a",
+  "type": "orchestrator",
+  "agents": [
+    {
+      "id": "parser-agent",
+      "role": "Parse JSX into AST"
+    },
+    {
+      "id": "a11y-agent",
+      "role": "Detect WCAG issues"
+    },
+    {
+      "id": "fix-agent",
+      "role": "Fix accessibility issues"
+    },
+    {
+      "id": "report-agent",
+      "role": "Generate final report"
+    }
+  ],
+  "flow": [
+    {
+      "from": "parser-agent",
+      "to": "a11y-agent"
+    },
+    {
+      "from": "a11y-agent",
+      "to": "fix-agent"
+    },
+    {
+      "from": "fix-agent",
+      "to": "report-agent"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "skills": [
+    {
+      "name": "syntax-check",
+      "description": "Validates syntax errors and compilation issues",
+      "prompt": "Analyze the given code and list syntax or compilation errors."
+    },
+    {
+      "name": "lint-check",
+      "description": "Checks coding standards and formatting",
+      "prompt": "Identify violations of coding standards and suggest fixes."
+    },
+    {
+      "name": "bug-detection",
+      "description": "Find logical bugs and edge cases",
+      "prompt": "Identify logical bugs, incorrect assumptions, and missing edge case handling."
+    },
+    {
+      "name": "null-pointer-check",
+      "description": "Detect null safety issues",
+      "prompt": "Check for potential null pointer exceptions and suggest null-safe patterns."
+    },
+    {
+      "name": "security-scan",
+      "description": "Detect security vulnerabilities",
+      "prompt": "Identify vulnerabilities such as SQL injection, XSS, insecure deserialization, improper auth, and secrets exposure."
+    },
+    {
+      "name": "performance-analysis",
+      "description": "Analyze performance bottlenecks",
+      "prompt": "Detect inefficient loops, memory issues, blocking calls, and suggest optimizations."
+    },
+    {
+      "name": "complexity-analysis",
+      "description": "Evaluate code complexity",
+      "prompt": "Analyze cyclomatic complexity and suggest simplifications."
+    },
+    {
+      "name": "design-pattern-check",
+      "description": "Check design patterns usage",
+      "prompt": "Evaluate if appropriate design patterns are used and suggest improvements."
+    },
+    {
+      "name": "solid-principles-check",
+      "description": "Validate SOLID principles",
+      "prompt": "Analyze adherence to SOLID principles and suggest refactoring."
+    }
+  ]
+}

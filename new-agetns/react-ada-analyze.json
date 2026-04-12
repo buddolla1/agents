@@ -1,0 +1,153 @@
+{
+  "name": "React ADA Accessibility Analyzer",
+  "id": "react-ada-analyzer",
+  "description": "Performs static analysis on React code to detect ADA/WCAG accessibility issues and provides actionable recommendations.",
+  "version": "1.0.0",
+  "input": {
+    "type": "object",
+    "properties": {
+      "fileContent": {
+        "type": "string",
+        "description": "React component code (JSX/TSX)"
+      },
+      "scanScope": {
+        "type": "string",
+        "enum": ["single_file", "multi_file"],
+        "default": "single_file"
+      },
+      "focusAreas": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "enum": [
+            "aria",
+            "keyboard",
+            "forms",
+            "images",
+            "semantic_html",
+            "color_contrast",
+            "screen_reader"
+          ]
+        },
+        "default": ["aria", "keyboard", "forms", "semantic_html"]
+      },
+      "complianceLevel": {
+        "type": "string",
+        "enum": ["A", "AA", "AAA"],
+        "default": "AA"
+      }
+    },
+    "required": ["fileContent"]
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "summary": {
+        "type": "string"
+      },
+      "issues": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string" },
+            "severity": {
+              "type": "string",
+              "enum": ["critical", "high", "medium", "low"]
+            },
+            "line": { "type": "number" },
+            "description": { "type": "string" },
+            "wcagReference": { "type": "string" },
+            "suggestion": { "type": "string" },
+            "exampleFix": { "type": "string" }
+          }
+        }
+      },
+      "score": {
+        "type": "number",
+        "description": "Accessibility score out of 100"
+      },
+      "recommendations": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "workflow": [
+    {
+      "step": "Parse JSX",
+      "action": "Build AST from React component"
+    },
+    {
+      "step": "Run accessibility rules",
+      "action": "Validate against WCAG 2.1 guidelines"
+    },
+    {
+      "step": "Detect violations",
+      "action": "Identify missing ARIA, labels, semantics, keyboard support"
+    },
+    {
+      "step": "Score calculation",
+      "action": "Assign score based on severity and count of issues"
+    },
+    {
+      "step": "Generate report",
+      "action": "Return structured issues with fixes"
+    }
+  ],
+  "skills": [
+    "jsx-ast-parser",
+    "wcag-2.1-validator",
+    "aria-attribute-checker",
+    "keyboard-navigation-checker",
+    "form-accessibility-checker",
+    "semantic-html-validator",
+    "image-alt-checker",
+    "screen-reader-compatibility-checker",
+    "accessibility-scoring-engine"
+  ],
+  "rules": [
+    "All interactive elements must be keyboard accessible",
+    "Images must include meaningful alt attributes",
+    "Form inputs must have associated labels",
+    "Use semantic HTML instead of div/span where possible",
+    "ARIA roles must be valid and not redundant",
+    "Avoid click handlers on non-interactive elements",
+    "Ensure focus visibility is maintained",
+    "Headings must follow logical order",
+    "Links must have descriptive text"
+  ],
+  "interactions": [
+    {
+      "question": "Do you want a quick scan or deep accessibility audit?",
+      "options": ["quick", "deep"]
+    },
+    {
+      "question": "Should I include suggested fixes?",
+      "options": ["yes", "no"]
+    },
+    {
+      "question": "Do you want WCAG reference links in the report?",
+      "options": ["yes", "no"]
+    }
+  ],
+  "examples": [
+    {
+      "input": {
+        "fileContent": "<img src='logo.png' />"
+      },
+      "output": {
+        "issues": [
+          {
+            "type": "image-alt-missing",
+            "severity": "high",
+            "description": "Image missing alt attribute",
+            "wcagReference": "WCAG 1.1.1",
+            "suggestion": "Add meaningful alt text",
+            "exampleFix": "<img src='logo.png' alt='Company logo' />"
+          }
+        ]
+      }
+    }
+  ]
+}

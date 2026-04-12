@@ -1,0 +1,32 @@
+{
+  "skills": [
+    {
+      "name": "detect-swallowed-exceptions",
+      "description": "Finds empty catch blocks or TODO exception handlers"
+    },
+    {
+      "name": "detect-improper-logging",
+      "description": "Checks if exceptions are logged without stack trace"
+    },
+    {
+      "name": "detect-missing-controller-advice",
+      "description": "Ensures global exception handlers exist"
+    },
+    {
+      "name": "detect-async-exception-loss",
+      "description": "Identifies lost exceptions in async workflows"
+    },
+    {
+      "name": "detect-transaction-boundary-risks",
+      "description": "Ensures proper rollback behavior"
+    },
+    {
+      "name": "detect-resource-leak-risk",
+      "description": "Finds missing finally/try-with-resources blocks"
+    },
+    {
+      "name": "detect-enterprise-anti-patterns",
+      "description": "Detects layered exception wrapping and silent failures"
+    }
+  ]
+}

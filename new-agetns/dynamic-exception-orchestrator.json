@@ -4,7 +4,7 @@
   "model": "gpt-5.2",
   "description": "Elastic orchestrator that dynamically spawns agents based on project workload",
   "orchestration": {
-    "strategy": "hierarchical-parallel",
+    "strategy": "hierarchical-parallel", //"adaptive-parallel","parallel",
     "dynamicAgents": true,
     "scalingPolicy": {
       "metric": "file-count",

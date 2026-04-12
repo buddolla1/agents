@@ -1,0 +1,127 @@
+{
+  "name": "JSON to Postman Script Generator",
+  "id": "json-to-postman-agent",
+  "description": "Generates Postman collection, requests, and test scripts from input JSON payload",
+  "version": "1.0.0",
+  "inputs": {
+    "type": "object",
+    "properties": {
+      "inputJson": {
+        "type": "string",
+        "description": "Raw JSON payload or API contract"
+      },
+      "apiDetails": {
+        "type": "object",
+        "description": "Optional API metadata",
+        "properties": {
+          "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+          },
+          "url": {
+            "type": "string"
+          },
+          "headers": {
+            "type": "object"
+          }
+        }
+      },
+      "testType": {
+        "type": "string",
+        "enum": ["basic", "advanced"],
+        "default": "basic"
+      }
+    },
+    "required": ["inputJson"]
+  },
+  "workflow": [
+    {
+      "step": "validate_input",
+      "description": "Validate and parse input JSON",
+      "actions": [
+        "Check if inputJson is valid JSON",
+        "Infer schema (fields, types, nested objects)",
+        "Detect arrays and optional fields"
+      ]
+    },
+    {
+      "step": "infer_request",
+      "description": "Generate Postman request structure",
+      "actions": [
+        "Determine HTTP method (default POST if not provided)",
+        "Generate URL placeholder if missing",
+        "Attach headers (Content-Type: application/json)",
+        "Create request body using input JSON"
+      ]
+    },
+    {
+      "step": "generate_tests",
+      "description": "Create Postman test scripts",
+      "actions": [
+        "Generate status code check (200/201)",
+        "Validate response time < 2s",
+        "Add JSON schema validation",
+        "Validate key fields exist in response",
+        "Optional: deep validation for advanced mode"
+      ]
+    },
+    {
+      "step": "generate_pre_request",
+      "description": "Optional pre-request scripts",
+      "actions": [
+        "Generate dynamic variables (timestamps, UUIDs)",
+        "Set environment variables if needed"
+      ]
+    },
+    {
+      "step": "build_collection",
+      "description": "Assemble final Postman collection JSON",
+      "actions": [
+        "Wrap request + tests into Postman collection v2.1 format",
+        "Add folder structure if multiple endpoints inferred"
+      ]
+    }
+  ],
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "postmanCollection": {
+        "type": "string",
+        "description": "Generated Postman collection JSON"
+      },
+      "testScripts": {
+        "type": "string",
+        "description": "Standalone Postman test scripts"
+      }
+    }
+  },
+  "user_interactions": [
+    {
+      "prompt": "Do you want basic or advanced test cases?",
+      "type": "selection",
+      "options": ["basic", "advanced"]
+    },
+    {
+      "prompt": "Provide API URL (or use placeholder)?",
+      "type": "input"
+    },
+    {
+      "prompt": "Do you want environment variables generated?",
+      "type": "yes_no"
+    }
+  ],
+  "examples": [
+    {
+      "input": {
+        "inputJson": "{ \"name\": \"John\", \"age\": 30 }",
+        "apiDetails": {
+          "method": "POST",
+          "url": "https://api.example.com/users"
+        }
+      },
+      "output": {
+        "description": "Postman collection with request body and test scripts validating name and age"
+      }
+    }
+  ]
+}

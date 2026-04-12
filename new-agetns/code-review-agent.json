@@ -1,0 +1,76 @@
+{
+  "name": "code-review-agent",
+  "id": "code-review-agent",
+  "description": "Performs deep static code analysis, identifies bugs, security issues, performance bottlenecks, and suggests improvements.",
+  "version": "2.0",
+
+  "systemPrompt": "You are a Principal Software Engineer with 20+ years of experience. Perform strict, production-grade code reviews. Focus on correctness, readability, maintainability, performance, and security. Do not be lenient. Provide actionable feedback with examples.",
+
+  "inputs": {
+    "code": {
+      "type": "string",
+      "description": "Source code to review"
+    },
+    "language": {
+      "type": "string",
+      "description": "Programming language (Java, JS, Python, etc.)"
+    },
+    "review_type": {
+      "type": "string",
+      "enum": ["quick", "full", "security", "performance"],
+      "default": "full"
+    }
+  },
+
+  "workflow": [
+    {
+      "step": "classify_review",
+      "description": "Determine review depth and strategy",
+      "action": "route_by_review_type"
+    },
+    {
+      "step": "run_static_checks",
+      "description": "Run linting and static analysis",
+      "skills": ["syntax-check", "lint-check"]
+    },
+    {
+      "step": "deep_analysis",
+      "description": "Perform advanced analysis",
+      "skills": [
+        "bug-detection",
+        "null-pointer-check",
+        "security-scan",
+        "performance-analysis",
+        "complexity-analysis"
+      ]
+    },
+    {
+      "step": "design_review",
+      "description": "Evaluate architecture and design",
+      "skills": [
+        "design-pattern-check",
+        "solid-principles-check"
+      ]
+    },
+    {
+      "step": "generate_report",
+      "description": "Generate structured markdown report",
+      "action": "compile_markdown_report"
+    }
+  ],
+
+  "outputs": {
+    "format": "markdown",
+    "sections": [
+      "Summary",
+      "Critical Issues",
+      "Major Issues",
+      "Minor Issues",
+      "Security Findings",
+      "Performance Improvements",
+      "Design Feedback",
+      "Refactored Code Suggestions"
+    ]
+  }
+}
+

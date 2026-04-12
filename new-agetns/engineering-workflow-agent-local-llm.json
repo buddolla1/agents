@@ -1,0 +1,143 @@
+{
+  "name": "engineering-workflow-agent",
+  "description": "Advanced orchestrator for local code review, compliance, security, and runtime validation using hybrid execution",
+  "version": "2.0",
+
+  "systemPrompt": "You are a principal engineering orchestrator. Execute agents in parallel where possible, aggregate results, assign weighted scores, and produce strict PR-level decisions with actionable insights.",
+
+  "inputs": {
+    "codeDiff": "string",
+    "fullCodebasePath": "string",
+    "metadata": {
+      "repo": "string",
+      "branch": "string",
+      "author": "string"
+    }
+  },
+
+  "agents": [
+    {
+      "name": "compliance",
+      "ref": "instruction-compliance-verifier",
+      "weight": 0.3
+    },
+    {
+      "name": "exception",
+      "ref": "runtime-exception-detector",
+      "weight": 0.2
+    },
+    {
+      "name": "security",
+      "ref": "security-best-practices-agent",
+      "weight": 0.3
+    },
+    {
+      "name": "code-review",
+      "ref": "local-llm-code-review-agent",
+      "weight": 0.2
+    }
+  ],
+
+  "workflow": {
+    "type": "hybrid",
+    "phases": [
+      {
+        "phase": "pre-processing",
+        "type": "sequential",
+        "steps": [
+          {
+            "step": "load-diff",
+            "action": "normalize-diff"
+          },
+          {
+            "step": "chunk-codebase",
+            "action": "dynamic-chunking"
+          }
+        ]
+      },
+      {
+        "phase": "analysis",
+        "type": "parallel",
+        "agents": [
+          "compliance",
+          "exception",
+          "security",
+          "code-review"
+        ]
+      },
+      {
+        "phase": "post-processing",
+        "type": "sequential",
+        "steps": [
+          {
+            "step": "aggregate-results",
+            "action": "merge-agent-outputs"
+          },
+          {
+            "step": "score-calculation",
+            "action": "weighted-score"
+          }
+        ]
+      }
+    ]
+  },
+
+  "decisionEngine": {
+    "strategy": "weighted",
+    "rules": [
+      {
+        "condition": "compliance.score < 80",
+        "result": "FAIL",
+        "severity": "HIGH"
+      },
+      {
+        "condition": "security.criticalIssues > 0",
+        "result": "FAIL",
+        "severity": "CRITICAL"
+      },
+      {
+        "condition": "code-review.blockers > 0",
+        "result": "FAIL",
+        "severity": "HIGH"
+      },
+      {
+        "condition": "overallScore >= 85",
+        "result": "PASS"
+      },
+      {
+        "condition": "overallScore >= 70 && overallScore < 85",
+        "result": "REVIEW"
+      }
+    ],
+    "default": "FAIL"
+  },
+
+  "scoring": {
+    "method": "weighted-average",
+    "formula": "sum(agent.score * agent.weight)"
+  },
+
+  "output": {
+    "format": "pr-ready-report",
+    "sections": [
+      "summary",
+      "agent-findings",
+      "risk-analysis",
+      "score-breakdown",
+      "final-decision",
+      "recommended-fixes"
+    ]
+  },
+
+  "integrations": {
+    "localLLM": {
+      "provider": "llama3",
+      "mode": "docker",
+      "endpoint": "http://localhost:11434"
+    },
+    "scm": {
+      "type": "bitbucket",
+      "prMode": true
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "name": "springboot-exception-orchestrator",
+  "description": "Orchestrates distributed agents to detect exception risks across large Spring Boot codebases",
+  "version": "2.0",
+  "model": "gpt-5.2",
+  "orchestration": {
+    "strategy": "parallel-hierarchical",
+    "maxAgents": 8,
+    "chunking": {
+      "mode": "semantic",
+      "maxFilesPerChunk": 40
+    },
+    "aggregation": {
+      "deduplicate": true,
+      "riskMerge": "highest-severity-wins"
+    }
+  },
+  "systemPrompt": "You are a senior Spring Boot reliability engineer and distributed systems architect. You coordinate specialized agents to analyze large codebases for exception handling weaknesses, reliability risks, and production failure points. Ensure consistency, no overlap, and consolidated risk reporting.",
+  "agents": [
+    {
+      "id": "file-discovery",
+      "name": "File Discovery Agent",
+      "role": "Scans repository and indexes files by type, module, and risk area",
+      "model": "gpt-5.2"
+    },
+    {
+      "id": "parallel-coordinator",
+      "name": "Parallel Scan Coordinator",
+      "role": "Distributes file chunks to scanning agents and monitors progress",
+      "model": "gpt-5.2"
+    },
+    {
+      "id": "java-exception",
+      "name": "Core Java Exception Agent",
+      "role": "Detects try/catch misuse, swallowed exceptions, rethrow anti-patterns",
+      "model": "gpt-5.2"
+    },
+    {
+      "id": "spring-mvc-exception",
+      "name": "Spring MVC Exception Agent",
+      "role": "Analyzes @ControllerAdvice, REST error handling, response status mapping",
+      "model": "gpt-5.2"
+    },
+    {
+      "id": "async-exception",
+      "name": "Async & Threading Exception Agent",
+      "role": "Detects CompletableFuture, ExecutorService, @Async exception leaks",
+      "model": "gpt-5.2"
+    },
+    {
+      "id": "logging-monitoring",
+      "name": "Logging & Observability Agent",
+      "role": "Ensures exceptions are logged with context and traceability",
+      "model": "gpt-5.2"
+    },
+    {
+      "id": "transaction-safety",
+      "name": "Transaction Safety Agent",
+      "role": "Detects rollback risks, unchecked exception propagation, @Transactional misuse",
+      "model": "gpt-5.2"
+    },
+    {
+      "id": "pattern-intelligence",
+      "name": "Pattern Intelligence Agent",
+      "role": "Detects known enterprise exception anti-patterns",
+      "model": "gpt-5.2"
+    },
+    {
+      "id": "risk-scoring",
+      "name": "Risk Scoring Agent",
+      "role": "Ranks exception issues by production severity",
+      "model": "gpt-5.2"
+    },
+    {
+      "id": "report-generator",
+      "name": "Exception Reliability Report Agent",
+      "role": "Generates architectural risk report with fixes and code snippets",
+      "model": "gpt-5.2"
+    }
+  ]
+}
