@@ -14,7 +14,10 @@
       "security-scanner",
       "migration-agent",
       "api-doc-generator",
-      "frontend-optimizer"
+      "frontend-optimizer",
+      "runtime-exception-detector",
+      "compliance-verifier",
+      "null-safety-agent"
     ],
     "executionStrategy": "parallel-with-dependencies",
     "triggers": ["on-save", "pre-commit", "on-build", "manual"]
@@ -35,15 +38,24 @@
     },
 
     "code-reviewer": {
-      "name": "code-reviewer",
-      "description": "Analyzes code for issues and best practices",
-      "systemPrompt": "Review code like a senior architect. Identify bugs, anti-patterns, and improvements.",
+      "name": "code-review-agent",
+      "id": "code-review-agent",
+      "description": "Performs deep static code analysis, identifies bugs, security issues, performance bottlenecks, and suggests improvements.",
+      "version": "2.0",
+      "systemPrompt": "You are a Principal Software Engineer with 20+ years of experience. Perform strict, production-grade code reviews. Focus on correctness, readability, maintainability, performance, and security. Do not be lenient. Provide actionable feedback with examples.",
+      "inputs": {
+        "code": "string",
+        "language": "string",
+        "review_type": ["quick", "full", "security", "performance"]
+      },
       "checks": [
         "null-safety",
         "exception-handling",
         "logging",
         "performance",
-        "readability"
+        "readability",
+        "complexity-analysis",
+        "design-pattern-check"
       ],
       "severityLevels": ["low", "medium", "high", "critical"]
     },
@@ -72,8 +84,17 @@
     },
 
     "security-scanner": {
-      "name": "security-scanner",
-      "description": "Detects vulnerabilities",
+      "name": "security-agent",
+      "description": "Analyzes code for vulnerabilities, insecure patterns, and compliance issues",
+      "triggers": [
+        "security",
+        "vulnerability",
+        "auth",
+        "encryption",
+        "injection",
+        "xss",
+        "csrf"
+      ],
       "checks": [
         "sql-injection",
         "xss",
@@ -99,8 +120,16 @@
     },
 
     "performance-analyzer": {
-      "name": "performance-analyzer",
-      "description": "Detects performance bottlenecks",
+      "name": "performance-agent",
+      "description": "Detects performance bottlenecks, memory issues, and inefficient logic",
+      "triggers": [
+        "performance",
+        "slow",
+        "latency",
+        "optimization",
+        "memory",
+        "cpu"
+      ],
       "metrics": [
         "response-time",
         "cpu-usage",
@@ -115,13 +144,14 @@
 
     "migration-agent": {
       "name": "migration-agent",
-      "description": "Handles Java and Spring upgrades",
+      "description": "Handles Java and Spring Boot upgrades",
       "targets": {
         "java": "21+",
-        "spring": "4.x"
+        "spring-boot": "3.x"
       },
       "tasks": [
         "deprecated-api-replacement",
+        "jakarta-ee-migration",
         "config-migration",
         "dependency-upgrade"
       ]
@@ -145,6 +175,41 @@
         "bundle-size",
         "lazy-loading",
         "state-management"
+      ]
+    },
+
+    "runtime-exception-detector": {
+      "name": "runtime-exception-detector",
+      "description": "Identifies risky exception handling and potential runtime failures",
+      "systemPrompt": "Analyze the codebase for swallowed exceptions, improper logging, and resource leaks.",
+      "skills": [
+        "detect-swallowed-exceptions",
+        "detect-improper-logging",
+        "detect-missing-controller-advice",
+        "detect-async-exception-loss",
+        "detect-transaction-boundary-risks",
+        "detect-resource-leak-risk",
+        "detect-enterprise-anti-patterns"
+      ],
+      "severityLevels": ["medium", "high", "critical"]
+    },
+
+    "compliance-verifier": {
+      "name": "instruction-compliance-verifier",
+      "description": "Enforces coding instructions, style guides, and project-specific constraints",
+      "systemPrompt": "Ensure the code adheres to all provided instructions and architectural constraints.",
+      "severityLevels": ["high", "critical"]
+    },
+
+    "null-safety-agent": {
+      "name": "enterprise-null-safety-agent",
+      "description": "Performs deep null safety, NPE detection, and data flow analysis across layers",
+      "triggers": [
+        "null",
+        "npe",
+        "null pointer",
+        "null safety",
+        "optional misuse"
       ]
     }
   }
