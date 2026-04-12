@@ -1,0 +1,26 @@
+{
+  "name": "postman-collection-generator",
+  "description": "Generates Postman collection JSON and RTS handoff Markdown from Spring Boot REST controllers",
+  "version": "2.0",
+  "systemPrompt": "You are an API documentation expert. You analyze Spring Boot REST controllers and generate Postman Collection v2.1 JSON and a structured RTS handoff Markdown file for support teams.",
+  "skills": [
+    "api-scanner",
+    "request-body-generator",
+    "auth-detector",
+    "environment-generator",
+    "collection-formatter",
+    "markdown-generator"
+  ],
+  "actions": [
+    {
+      "name": "generate-postman-collection",
+      "description": "Create Postman collection JSON from project APIs",
+      "prompt": "Scan Spring Boot project controllers and extract:\n- Base URL\n- Endpoints\n- HTTP methods\n- Path variables\n- Query parameters\n- Request body\n- Authentication headers\n\nGenerate Postman Collection v2.1 JSON format.\nGroup APIs by controller.\nInclude sample request bodies.\nInclude Bearer token auth if Spring Security detected."
+    },
+    {
+      "name": "generate-rts-md",
+      "description": "Generate RTS handoff Markdown file for modified APIs",
+      "prompt": "Based on the scanned Spring Boot REST controllers, generate a professional RTS handoff document in Markdown format (.md). Include:\n\n# Application Overview\n- Purpose\n- Modules\n\n# API Summary\n- List endpoints with HTTP methods, paths, and description\n\n# Authentication\n- Security type, headers\n\n# Request Examples\n- Sample request bodies\n\n# Environment Variables\n- Base URLs, tokens\n\n# Recent Changes\n- Include modified endpoints only\n\n# Support Notes\n- Known issues, troubleshooting steps\n\nOutput in clean Markdown format ready for support team."
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "name": "rts-handoff-incremental",
+  "description": "Generates incremental RTS handoff documentation based on modified files",
+  "version": "2.0",
+  "model": "gpt-4.1",
+  "systemPrompt": "You are a senior DevOps documentation engineer. You update RTS handoff documents by analyzing only modified files in Java Spring Boot Gradle projects.",
+  "actions": [
+    {
+      "name": "generate-incremental-rts",
+      "description": "Generate RTS updates based on changed files only",
+      "prompt": "You are given a list of modified files from a Spring Boot Gradle project.\n\nTasks:\n1. Analyze only the modified files.\n2. Identify which RTS sections are impacted.\n3. Generate only the updated sections.\n4. Produce a 'Recent Changes' summary.\n5. Output in Markdown.\n\nSections that may be impacted:\n- APIs (if Controllers changed)\n- Database (if Entity/Repository changed)\n- Config (if application.yml changed)\n- Scheduled Jobs (if @Scheduled found)\n- Security (if SecurityConfig changed)\n- Dependencies (if build.gradle changed)\n- Deployment (if Docker/K8s files changed)\n\nOutput format:\n# RTS Incremental Update\n## Modified Components\n## Updated Sections\n## Recent Changes Summary\n## Support Impact\n\nKeep concise and professional."
+    }
+  ]
+}

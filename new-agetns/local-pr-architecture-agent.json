@@ -1,0 +1,95 @@
+{
+  "name": "local-pr-architecture-agent",
+  "description": "Local IntelliJ Copilot agent for dynamic architecture analysis, Mermaid diagrams, instructions.md, and PR simulation",
+  "version": "1.0",
+  "entry": "analyze-local-pr",
+  "tools": ["filesystem", "search", "codebase", "git"],
+
+  "strategy": {
+    "type": "parallel",
+    "maxConcurrency": 4
+  },
+
+  "workflows": {
+    "analyze-local-pr": [
+      "discover-modules",
+      "dynamic-chunking",
+      "parallel-analysis",
+      "aggregate-results",
+      "generate-visual-diagram",
+      "generate-instructions-file",
+      "local-pr-simulation"
+    ]
+  },
+
+  "actions": {
+
+    "discover-modules": {
+      "type": "inline",
+      "prompt": "Scan the local repository and list all top-level modules (services, backend, frontend, shared libs). Output JSON array with name, path, and type."
+    },
+
+    "dynamic-chunking": {
+      "type": "inline",
+      "prompt": "For any module/folder with >500 files or >10k LOC, split into smaller chunks for parallel analysis. Output JSON array of final chunks with name, path, type."
+    },
+
+    "parallel-analysis": {
+      "type": "parallel",
+      "foreach": "dynamic-chunking",
+      "maxConcurrency": 4,
+      "actions": [
+        "scan-module",
+        "detect-module-architecture",
+        "detect-anti-patterns"
+      ]
+    },
+
+    "scan-module": {
+      "type": "inline",
+      "prompt": "Analyze a module: detect language, frameworks, build tools, folder structure, and dependencies. Return JSON."
+    },
+
+    "detect-module-architecture": {
+      "type": "inline",
+      "prompt": "Detect architecture style, layer usage, integration patterns, and potential anti-patterns for this module. Return JSON."
+    },
+
+    "detect-anti-patterns": {
+      "type": "inline",
+      "prompt": "Identify common anti-patterns in the module: fat controllers, missing logging, bypassing service layer, tight coupling. Return JSON array with issue, severity, and file path."
+    },
+
+    "aggregate-results": {
+      "type": "inline",
+      "prompt": "Combine all module-level outputs into global architecture summary, tech stack, anti-pattern report, and coding standards summary. Return JSON."
+    },
+
+    "generate-visual-diagram": {
+      "type": "inline",
+      "prompt": "Using aggregated results, generate a Mermaid diagram showing:\n- Modules/services\n- Layers (Controller/Service/Repo/Frontend)\n- Integration flows (REST, Messaging, DB)\nReturn Markdown snippet with ```mermaid block."
+    },
+
+    "generate-instructions-file": {
+      "type": "inline",
+      "prompt": "Generate `instructions.md` using aggregated results and Mermaid diagram. Include:\n- Architecture overview\n- Tech stack\n- Coding standards\n- Backend/Frontend/Integration guidelines\n- Anti-patterns to avoid\n- Testing/Security/Performance rules\n- Mermaid diagram embedded\nOutput Markdown only, save as instructions.md."
+    },
+
+    "local-pr-simulation": {
+      "type": "inline",
+      "prompt": "Simulate a local PR review:\n1. Detect changed files between the current branch and target branch (default main) using git.\n2. Analyze only changed modules/files for anti-patterns, architecture violations, and coding standard issues.\n3. Generate a JSON report and suggestions for each file/module.\n4. Include updates to instructions.md if relevant.\n5. Return a summary including:\n- Changed modules/files\n- Detected issues\n- Suggested Copilot prompts for fixes\n- Link to local instructions.md file."
+    }
+
+  },
+
+  "outputs": [
+    {
+      "type": "file",
+      "path": "instructions.md"
+    },
+    {
+      "type": "json",
+      "path": "local-pr-simulation-report.json"
+    }
+  ]
+}

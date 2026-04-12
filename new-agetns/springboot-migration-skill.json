@@ -1,0 +1,44 @@
+{
+  "skillName": "SpringBootMigration",
+  "description": "Helps developers migrate Java Spring Boot 3.x projects to 4.x by analyzing code, dependencies, and configurations.",
+  "version": "1.0",
+  "prompts": [
+    {
+      "id": "check-version",
+      "type": "instruction",
+      "description": "Check current Spring Boot version and dependencies",
+      "prompt": "Analyze the project and identify the current Spring Boot version and all Spring dependencies."
+    },
+    {
+      "id": "breaking-changes",
+      "type": "instruction",
+      "description": "Identify breaking changes in Spring Boot 4.x",
+      "prompt": "List all potential breaking changes when migrating from Spring Boot 3.x to 4.x, including configuration properties, deprecated APIs, and starter modules."
+    },
+    {
+      "id": "update-dependencies",
+      "type": "instruction",
+      "description": "Suggest updated dependencies",
+      "prompt": "Provide updated Maven or Gradle dependencies compatible with Spring Boot 4.x."
+    },
+    {
+      "id": "code-fixes",
+      "type": "instruction",
+      "description": "Code adjustments for 4.x",
+      "prompt": "Suggest changes in code, annotations, and packages required for Spring Boot 4.x compatibility."
+    },
+    {
+      "id": "configuration-updates",
+      "type": "instruction",
+      "description": "Update application configuration files",
+      "prompt": "Provide updated application.properties or application.yml examples compatible with Spring Boot 4.x."
+    },
+    {
+      "id": "test-migration",
+      "type": "instruction",
+      "description": "Testing post migration",
+      "prompt": "Provide steps and sample test cases to verify migration is successful, including Spring Boot test annotations and sample integration tests."
+    }
+  ],
+  "outputFormats": ["markdown", "json", "code-snippet"]
+}

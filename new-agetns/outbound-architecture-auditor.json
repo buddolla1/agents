@@ -1,0 +1,201 @@
+{
+  "name": "outbound-architecture-auditor",
+  "description": "Enterprise-grade agent that analyzes all outbound dependencies across frontend and backend, detects architectural risks, failure chains, and production-readiness gaps",
+  "version": "4.0",
+  "model": "gpt-4.1",
+  "entry": "analyzeArchitecture",
+
+  "capabilities": [
+    "codebase-search",
+    "deep-static-analysis",
+    "cross-layer-correlation",
+    "pattern-detection",
+    "risk-analysis",
+    "report-generation"
+  ],
+
+  "inputs": {
+    "includePackages": {
+      "type": "array",
+      "default": ["com", "src"]
+    }
+  },
+
+  "instructions": [
+
+    "Scan entire codebase (frontend + backend) and identify ALL outbound interactions.",
+
+    "Classify interactions into: REST, Messaging, Database, Cache (Redis/GemFire), Cloud (S3), SDK, Browser calls.",
+
+    "---- LEVEL 1: BASIC VALIDATION ----",
+    "Check timeout, logging, exception handling, retry, circuit breaker, fallback for each outbound call.",
+
+    "---- LEVEL 2: SYSTEM CORRELATION ----",
+    "Trace logical flow across layers:",
+    "Frontend → API → Messaging → Consumer → DB/Cache → External systems.",
+
+    "Detect missing correlationId propagation across layers.",
+
+    "---- LEVEL 3: FAILURE CHAIN ANALYSIS ----",
+
+    "Identify cascading failure risks such as:",
+    "- Cache failure → DB overload → service crash",
+    "- Kafka publish failure without retry → data loss",
+    "- REST timeout missing → thread exhaustion",
+    "- No circuit breaker → downstream outage propagation",
+
+    "---- LEVEL 4: ARCHITECTURAL ANTI-PATTERNS ----",
+
+    "Detect:",
+    "- Direct SDK usage inside controllers",
+    "- Tight coupling between services",
+    "- Missing abstraction layers",
+    "- Blocking calls in async flows",
+    "- No fallback strategy",
+    "- Overloaded synchronous APIs",
+
+    "---- LEVEL 5: DATA RISK ANALYSIS ----",
+
+    "Detect:",
+    "- Large payloads in Kafka/GemFire",
+    "- No pagination in DB queries",
+    "- No TTL in cache",
+    "- Unbounded retries",
+
+    "---- LEVEL 6: RESILIENCE MATURITY MODEL ----",
+
+    "Score each service:",
+    "0-30: Critical (Production risk)",
+    "30-60: Weak",
+    "60-80: Moderate",
+    "80-100: Production Ready",
+
+    "Scoring based on:",
+    "- Timeout coverage",
+    "- Retry/circuit breaker",
+    "- Logging",
+    "- Observability",
+    "- Failure handling",
+
+    "---- LEVEL 7: GENERATE OUTPUT ----",
+
+    "Generate a markdown report with sections:",
+
+    "1. Executive Summary",
+    "2. Architecture Risk Score",
+    "3. Critical Failure Chains",
+    "4. High Severity Issues",
+    "5. Anti-Patterns",
+    "6. Service-wise Scorecard",
+    "7. Recommended Fixes (code-level + architecture-level)",
+
+    "---- LEVEL 8: SUGGEST FIXES ----",
+
+    "Provide production-grade fixes such as:",
+    "- Resilience4j configs",
+    "- Retry templates",
+    "- Proper timeout configs",
+    "- Fallback patterns",
+    "- Circuit breaker examples"
+  ],
+
+  "skills": {
+    "patterns": [
+
+      // TIMEOUT
+      {
+        "name": "missing-timeout",
+        "search": "RestTemplate;WebClient;fetch;axios;KafkaTemplate;S3Client",
+        "condition": "no timeout",
+        "severity": "HIGH",
+        "message": "Missing timeout configuration"
+      },
+
+      // EXCEPTION
+      {
+        "name": "no-exception-handling",
+        "search": "execute;send;fetch;query",
+        "condition": "no try-catch",
+        "severity": "HIGH",
+        "message": "No exception handling"
+      },
+
+      // LOGGING
+      {
+        "name": "no-logging",
+        "search": "execute;send;fetch",
+        "condition": "no logger",
+        "severity": "MEDIUM",
+        "message": "No logging for outbound call"
+      },
+
+      // CORRELATION
+      {
+        "name": "no-correlation-id",
+        "search": "fetch;RestTemplate;KafkaTemplate",
+        "condition": "no MDC",
+        "severity": "HIGH",
+        "message": "Missing correlationId propagation"
+      },
+
+      // CACHE RISKS
+      {
+        "name": "cache-no-ttl",
+        "search": "redisTemplate;Region",
+        "condition": "no expiration",
+        "severity": "HIGH",
+        "message": "Cache without TTL (memory risk)"
+      },
+
+      // DB RISKS
+      {
+        "name": "db-no-pagination",
+        "search": "findAll(",
+        "severity": "HIGH",
+        "message": "Unbounded DB query (no pagination)"
+      },
+
+      // KAFKA
+      {
+        "name": "kafka-no-retry",
+        "search": "KafkaTemplate",
+        "condition": "no retries",
+        "severity": "HIGH",
+        "message": "Kafka without retry (data loss risk)"
+      },
+
+      // GEMFIRE (Enhanced)
+      {
+        "name": "gemfire-no-fallback",
+        "search": "region.get(",
+        "condition": "no fallback",
+        "severity": "HIGH",
+        "message": "No fallback on GemFire failure"
+      },
+
+      // FRONTEND
+      {
+        "name": "fetch-no-timeout",
+        "search": "fetch(",
+        "condition": "no AbortController",
+        "severity": "HIGH",
+        "message": "Frontend fetch without timeout"
+      },
+
+      // SDK
+      {
+        "name": "sdk-direct-usage",
+        "search": "new .*Client(",
+        "severity": "MEDIUM",
+        "message": "Direct SDK usage without abstraction"
+      }
+    ]
+  },
+
+  "outputs": {
+    "report": {
+      "type": "markdown",
+      "description": "Enterprise architecture audit report with risk scoring and failure analysis"
+    }
+  }
+}

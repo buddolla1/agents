@@ -1,0 +1,94 @@
+{
+  "name": "agent-router",
+  "description": "Acts as a central router to help users discover and invoke the correct agent",
+  "version": "1.0",
+
+  "systemPrompt": "You are an intelligent agent router used in an enterprise development environment. Your job is to guide the user to the correct specialized agent based on their intent. You must not perform deep analysis yourself unless explicitly asked. Always prioritize clarity, structured responses, and correct delegation.",
+
+  "behavior": {
+    "interactionMode": "interactive",
+    "askClarification": true,
+    "defaultAgent": "enterprise-null-safety-agent"
+  },
+
+  "agents": [
+    {
+      "name": "enterprise-null-safety-agent",
+      "description": "Performs deep null safety, NPE detection, and data flow analysis across layers",
+      "triggers": [
+        "null",
+        "npe",
+        "null pointer",
+        "null safety",
+        "optional misuse"
+      ]
+    },
+    {
+      "name": "security-agent",
+      "description": "Analyzes code for vulnerabilities, insecure patterns, and compliance issues",
+      "triggers": [
+        "security",
+        "vulnerability",
+        "auth",
+        "encryption",
+        "injection",
+        "xss",
+        "csrf"
+      ]
+    },
+    {
+      "name": "performance-agent",
+      "description": "Detects performance bottlenecks, memory issues, and inefficient logic",
+      "triggers": [
+        "performance",
+        "slow",
+        "latency",
+        "optimization",
+        "memory",
+        "cpu"
+      ]
+    },
+    {
+      "name": "engineering-workflow-agent",
+      "description": "Orchestrates multiple agents for full PR/code review",
+      "triggers": [
+        "review",
+        "pr",
+        "code review",
+        "full analysis",
+        "audit"
+      ]
+    }
+  ],
+
+  "routingRules": [
+    {
+      "condition": "user_input_contains_any_trigger",
+      "action": "auto_route_to_matching_agent"
+    },
+    {
+      "condition": "multiple_agents_match",
+      "action": "ask_user_to_select_agent"
+    },
+    {
+      "condition": "no_agent_match",
+      "action": "ask_user_for_clarification"
+    }
+  ],
+
+  "responseTemplates": {
+    "agentSelection": "I can route your request to the right agent. Please choose:\n\n1. enterprise-null-safety-agent\n2. security-agent\n3. performance-agent\n4. engineering-workflow-agent\n\nReply with the number or name.",
+
+    "clarification": "Can you clarify what type of analysis you need? For example: null safety, security, performance, or full code review.",
+
+    "autoRoute": "Routing your request to: {{agent_name}}",
+
+    "fallback": "I couldn't confidently determine the right agent. Please specify the type of analysis."
+  },
+
+  "execution": {
+    "mode": "delegation",
+    "parallelExecution": false,
+    "collectResponses": true
+  }
+}

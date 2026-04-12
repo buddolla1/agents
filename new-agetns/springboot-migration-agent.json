@@ -1,0 +1,53 @@
+{
+  "agentName": "SpringBootMigrationAgent",
+  "description": "Copilot-style agent to assist in migrating Spring Boot 3.x projects to 4.x",
+  "version": "1.0",
+  "skills": ["SpringBootMigration"],
+  "triggers": [
+    {
+      "type": "file-save",
+      "filePatterns": ["build.gradle", "pom.xml", "**/*.java", "application.properties", "application.yml"]
+    },
+    {
+      "type": "command",
+      "command": "migrate-springboot-4"
+    }
+  ],
+  "actions": [
+    {
+      "id": "analyze-project",
+      "skillPromptId": "check-version",
+      "description": "Analyze project for Spring Boot version and dependencies"
+    },
+    {
+      "id": "list-breaking-changes",
+      "skillPromptId": "breaking-changes",
+      "description": "List potential breaking changes"
+    },
+    {
+      "id": "update-dependencies",
+      "skillPromptId": "update-dependencies",
+      "description": "Suggest updated Maven/Gradle dependencies"
+    },
+    {
+      "id": "fix-code",
+      "skillPromptId": "code-fixes",
+      "description": "Provide code fixes and annotations"
+    },
+    {
+      "id": "update-config",
+      "skillPromptId": "configuration-updates",
+      "description": "Suggest updated configuration files"
+    },
+    {
+      "id": "verify-tests",
+      "skillPromptId": "test-migration",
+      "description": "Provide test strategy and sample tests"
+    }
+  ],
+  "defaultResponseMode": "markdown",
+  "uiSettings": {
+    "showSuggestionsInline": true,
+    "showSummaryAfterAnalysis": true
+  }
+}

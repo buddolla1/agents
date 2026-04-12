@@ -1,0 +1,151 @@
+{
+  "orchestrator": {
+    "name": "enterprise-orchestrator",
+    "version": "2.0",
+    "description": "Central orchestrator for all engineering agents",
+    "systemPrompt": "You are an AI architect coordinating multiple specialized agents for a Java Spring Boot and React enterprise system.",
+    "agents": [
+      "code-generator",
+      "code-reviewer",
+      "architecture-guardian",
+      "test-generator",
+      "log-analyzer",
+      "performance-analyzer",
+      "security-scanner",
+      "migration-agent",
+      "api-doc-generator",
+      "frontend-optimizer"
+    ],
+    "executionStrategy": "parallel-with-dependencies",
+    "triggers": ["on-save", "pre-commit", "on-build", "manual"]
+  },
+
+  "agents": {
+    "code-generator": {
+      "name": "code-generator",
+      "description": "Generates Spring Boot and React code",
+      "systemPrompt": "Generate clean, production-ready Java Spring Boot and React code following best practices.",
+      "inputs": ["requirements", "api-spec"],
+      "outputs": ["controller", "service", "repository", "react-component"],
+      "rules": [
+        "Use layered architecture",
+        "Follow REST standards",
+        "Use DTO pattern"
+      ]
+    },
+
+    "code-reviewer": {
+      "name": "code-reviewer",
+      "description": "Analyzes code for issues and best practices",
+      "systemPrompt": "Review code like a senior architect. Identify bugs, anti-patterns, and improvements.",
+      "checks": [
+        "null-safety",
+        "exception-handling",
+        "logging",
+        "performance",
+        "readability"
+      ],
+      "severityLevels": ["low", "medium", "high", "critical"]
+    },
+
+    "architecture-guardian": {
+      "name": "architecture-guardian",
+      "description": "Enforces Spring Boot architecture standards",
+      "rules": [
+        "Controller → Service → Repository flow",
+        "No business logic in controllers",
+        "DTO must be used",
+        "No direct DB access outside repository"
+      ],
+      "violations": {
+        "controller-logic": "HIGH",
+        "direct-db-access": "CRITICAL"
+      }
+    },
+
+    "test-generator": {
+      "name": "test-generator",
+      "description": "Generates unit and integration tests",
+      "systemPrompt": "Generate JUnit 5 and Mockito tests for Spring Boot and React Testing Library tests.",
+      "coverageTarget": 85,
+      "types": ["unit", "integration", "api", "ui"]
+    },
+
+    "security-scanner": {
+      "name": "security-scanner",
+      "description": "Detects vulnerabilities",
+      "checks": [
+        "sql-injection",
+        "xss",
+        "csrf",
+        "insecure-headers",
+        "auth-bypass"
+      ],
+      "severityLevels": ["medium", "high", "critical"]
+    },
+
+    "log-analyzer": {
+      "name": "log-analyzer",
+      "description": "Analyzes logs from Splunk",
+      "source": "splunk",
+      "query": "index=main error OR exception",
+      "pipeline": [
+        "fetch-logs",
+        "parse-logs",
+        "cluster-errors",
+        "detect-root-cause",
+        "suggest-fixes"
+      ]
+    },
+
+    "performance-analyzer": {
+      "name": "performance-analyzer",
+      "description": "Detects performance bottlenecks",
+      "metrics": [
+        "response-time",
+        "cpu-usage",
+        "memory-usage",
+        "db-latency"
+      ],
+      "thresholds": {
+        "response-time": "500ms",
+        "db-latency": "200ms"
+      }
+    },
+
+    "migration-agent": {
+      "name": "migration-agent",
+      "description": "Handles Java and Spring upgrades",
+      "targets": {
+        "java": "21+",
+        "spring": "4.x"
+      },
+      "tasks": [
+        "deprecated-api-replacement",
+        "config-migration",
+        "dependency-upgrade"
+      ]
+    },
+
+    "api-doc-generator": {
+      "name": "api-doc-generator",
+      "description": "Generates API docs and Postman collections",
+      "outputs": [
+        "openapi-spec",
+        "postman-collection",
+        "markdown-docs"
+      ]
+    },
+
+    "frontend-optimizer": {
+      "name": "frontend-optimizer",
+      "description": "Optimizes React performance and structure",
+      "checks": [
+        "re-render-issues",
+        "bundle-size",
+        "lazy-loading",
+        "state-management"
+      ]
+    }
+  }
+}

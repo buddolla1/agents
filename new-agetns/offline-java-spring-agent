@@ -1,0 +1,55 @@
+{
+  "name": "offline-java-spring-agent",
+  "description": "Local background copilot agent for Java Spring development, works fully offline",
+  "version": "1.0",
+  "model": {
+    "name": "starcoder-base",
+    "type": "local",
+    "path": "/opt/llms/starcoder-base",
+    "max_tokens": 2048
+  },
+  "systemPrompt": "You are a local offline copilot for Java Spring applications. You generate code suggestions, REST endpoints, Spring Boot configurations, repositories, service layers, and unit tests.",
+  "actions": [
+    {
+      "name": "generate-rest-controller",
+      "description": "Generates a REST controller for a given entity",
+      "parameters": [
+        { "name": "entityName", "type": "string" },
+        { "name": "fields", "type": "object" }
+      ],
+      "script": "scripts/generateRestController.js"
+    },
+    {
+      "name": "generate-repository",
+      "description": "Generates Spring Data repository for an entity",
+      "parameters": [
+        { "name": "entityName", "type": "string" }
+      ],
+      "script": "scripts/generateRepository.js"
+    },
+    {
+      "name": "generate-service-layer",
+      "description": "Generates service layer class for business logic",
+      "parameters": [
+        { "name": "entityName", "type": "string" }
+      ],
+      "script": "scripts/generateService.js"
+    },
+    {
+      "name": "generate-unit-tests",
+      "description": "Generates JUnit 5 tests for classes",
+      "parameters": [
+        { "name": "className", "type": "string" }
+      ],
+      "script": "scripts/generateUnitTests.js"
+    },
+    {
+      "name": "refactor-code",
+      "description": "Suggests refactoring improvements for given Java files",
+      "parameters": [
+        { "name": "files", "type": "array" }
+      ],
+      "script": "scripts/refactorCode.js"
+    }
+  ]
+}

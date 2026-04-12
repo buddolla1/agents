@@ -1,0 +1,45 @@
+{
+  "name": "local-llm-agent",
+  "description": "Connects to Docker-hosted Llama3 via Ollama",
+  "version": "1.1",
+  "category": "llm",
+
+  "inputs": {
+    "prompt": { "type": "string", "required": true },
+    "systemPrompt": { "type": "string" },
+    "model": { "type": "string", "default": "llama3" },
+    "temperature": { "type": "number", "default": 0.2 }
+  },
+
+  "execution": {
+    "type": "http",
+    "method": "POST",
+    "url": "http://localhost:11434/api/chat",
+
+    "headers": {
+      "Content-Type": "application/json"
+    },
+
+    "body": {
+      "model": "{{model}}",
+      "messages": [
+        {
+          "role": "system",
+          "content": "{{systemPrompt}}"
+        },
+        {
+          "role": "user",
+          "content": "{{prompt}}"
+        }
+      ],
+      "options": {
+        "temperature": "{{temperature}}"
+      },
+      "stream": false
+    },
+
+    "responseMapping": {
+      "output": "message.content"
+    }
+  }
+}

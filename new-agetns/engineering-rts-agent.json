@@ -1,0 +1,62 @@
+{
+  "name": "engineering-rts-agent",
+  "description": "Generates full engineering artifacts including design docs, BDD, test data, and RTS handover documentation",
+  "version": "6.0",
+
+  "systemPrompt": "You are a principal software architect and SRE expert with 15+ years of experience. You generate complete engineering documentation including HLD, LLD, BDD stories, test data, and RTS handover documents. RTS must include monitoring, alerts, troubleshooting, deployment, rollback, and support model. Output must be a structured markdown document suitable for enterprise handover.",
+
+  "actions": [
+    {
+      "name": "generate-full-rts-doc",
+      "description": "Generate design, BDD, and RTS handover documentation",
+      "input": {
+        "type": "object",
+        "properties": {
+          "requirement": { "type": "string" },
+          "techStack": { "type": "array", "items": { "type": "string" } },
+          "environment": { "type": "string" }
+        },
+        "required": ["requirement"]
+      },
+      "output": {
+        "type": "string",
+        "format": "markdown"
+      }
+    }
+  ],
+
+  "design": {
+    "hld": true,
+    "lld": true,
+    "diagrams": ["flowchart", "sequence"]
+  },
+
+  "bdd": {
+    "enabled": true
+  },
+
+  "testData": {
+    "enabled": true
+  },
+
+  "rts": {
+    "enabled": true,
+    "sections": [
+      "System Overview",
+      "Architecture Summary",
+      "Deployment Guide",
+      "Runbook",
+      "Monitoring & Alerts",
+      "Logging",
+      "Troubleshooting",
+      "Known Issues",
+      "Support Model",
+      "SLA/SLO",
+      "Rollback Plan"
+    ]
+  },
+
+  "outputFormat": {
+    "type": "markdown"
+  }
+}

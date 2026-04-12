@@ -1,0 +1,31 @@
+{
+  "name": "runtime-exception-agent",
+  "description": "Captures and analyzes runtime exceptions in Java applications",
+  "version": "1.0",
+
+  "rules": [
+    "Capture all uncaught runtime exceptions",
+    "Log stack trace with method and class",
+    "Detect repeated exceptions",
+    "Identify root cause patterns",
+    "Flag NullPointerException, IllegalArgumentException, IndexOutOfBoundsException",
+    "Check if exception is logged properly",
+    "Suggest fixes"
+  ],
+
+  "outputs": [
+    "exceptionType",
+    "className",
+    "methodName",
+    "stackTrace",
+    "frequency",
+    "severity"
+  ],
+
+  "severityModel": {
+    "critical": "Application crash",
+    "high": "Frequent runtime exception",
+    "medium": "Handled but risky exception",
+    "low": "Rare or minor issue"
+  }
+}
