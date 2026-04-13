@@ -1,0 +1,103 @@
+{
+  "name": "React ADA Accessibility Fixer",
+  "id": "react-ada-fixer",
+  "description": "Analyzes React files for ADA/WCAG accessibility issues and fixes them with best practices.",
+  "version": "1.0.0",
+  "input": {
+    "type": "object",
+    "properties": {
+      "fileContent": {
+        "type": "string",
+        "description": "React component code (JSX/TSX)"
+      },
+      "issue": {
+        "type": "string",
+        "description": "Accessibility issue to fix (e.g., missing aria-label, keyboard navigation issue)"
+      },
+      "framework": {
+        "type": "string",
+        "enum": ["react"],
+        "default": "react"
+      },
+      "scanType": {
+        "type": "string",
+        "enum": ["targeted_fix", "full_scan"],
+        "default": "targeted_fix"
+      }
+    },
+    "required": ["fileContent", "issue"]
+  },
+  "output": {
+    "type": "object",
+    "properties": {
+      "issuesDetected": {
+        "type": "array",
+        "items": { "type": "string" }
+      },
+      "fixedCode": {
+        "type": "string"
+      },
+      "diff": {
+        "type": "string"
+      },
+      "explanation": {
+        "type": "string"
+      },
+      "accessibilityChecklist": {
+        "type": "array",
+        "items": { "type": "string" }
+      }
+    }
+  },
+  "workflow": [
+    {
+      "step": "Parse React file",
+      "action": "Analyze JSX structure, semantic HTML usage, ARIA attributes, and event handlers."
+    },
+    {
+      "step": "Detect accessibility issues",
+      "action": "Identify violations based on WCAG 2.1 guidelines."
+    },
+    {
+      "step": "Apply fixes",
+      "action": "Refactor JSX to include proper roles, aria attributes, labels, and keyboard support."
+    },
+    {
+      "step": "Generate diff",
+      "action": "Show before vs after changes."
+    },
+    {
+      "step": "Explain changes",
+      "action": "Provide reasoning for each fix."
+    }
+  ],
+  "skills": [
+    "jsx-parser",
+    "wcag-validator",
+    "aria-enhancer",
+    "keyboard-accessibility-fixer",
+    "semantic-html-refactor",
+    "screen-reader-optimizer",
+    "diff-generator"
+  ],
+  "rules": [
+    "Prefer semantic HTML over ARIA when possible",
+    "Ensure all interactive elements are keyboard accessible",
+    "Every form input must have a label",
+    "Images must have alt text",
+    "Buttons must have accessible names",
+    "Avoid div/span for interactive elements unless necessary",
+    "Ensure focus management is handled properly"
+  ],
+  "examples": [
+    {
+      "input": {
+        "fileContent": "<div onClick={handleClick}>Submit</div>",
+        "issue": "Not keyboard accessible"
+      },
+      "output": {
+        "fixedCode": "<button onClick={handleClick}>Submit</button>"
+      }
+    }
+  ]
+}
