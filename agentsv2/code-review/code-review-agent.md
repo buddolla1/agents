@@ -16,6 +16,12 @@ Perform strict, production-grade code reviews focused on correctness, readabilit
 - Evaluating security, performance, or design concerns
 - Generating a structured review report
 
+## Repository Guidance
+
+- When reviewing Spring Boot code in this repository, follow `agentsv2/custom-instructions-fixes/instructions.md` as the project standard.
+- Preserve existing file and module patterns before applying broader guidance.
+- Use the agent for both file-scoped reviews and full-project scans, depending on the request.
+
 ## User Interactions
 
 Use these prompt patterns to invoke the agent:
