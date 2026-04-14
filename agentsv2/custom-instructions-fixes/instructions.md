@@ -1,240 +1,465 @@
-# 🚀 Copilot Instructions — Spring Boot Project
+# 🧩 Spring Boot Project — Engineering Standards & Best Practices
 
-Use these instructions when generating, reviewing, or refactoring code in this repository.
+## 1. Project Overview
 
----
-
-# 🧭 1. Repository Context
+This project is built using:
 
 * **Language:** Java 21+
 * **Framework:** Spring Boot 3.x+
-* **Architecture:** Layered / Clean (Controller → Service → Repository)
-* **API Style:** REST
-* **Persistence:** Spring Data JPA + JDBC (JdbcTemplate)
 * **Build Tool:** Maven or Gradle
+* **Architecture:** Layered / Clean / Hexagonal depending on service needs
+* **API Style:** RESTful APIs
+* **Packaging:** Docker containers
+* **Documentation:** OpenAPI + Markdown + Mermaid diagrams
 
 ---
 
-# ▶️ 2. Trigger Points
+## 2. Standard Project Structure
 
-Use these instructions automatically when:
+```text
+src/main/java/com/company/project
+ ├── config
+ ├── controller
+ ├── service
+ ├── repository
+ ├── jdbc
+ ├── dto
+ ├── entity
+ ├── mapper
+ ├── exception
+ ├── security
+ ├── client
+ ├── util
+ └── ProjectApplication.java
 
-* Creating a new controller, service, repository, DTO, entity, or exception
-* Refactoring code in an existing Spring module
-* Reviewing changed files in a PR or commit
-* Touching transaction boundaries, SQL, or persistence code
-* Changing API contracts, validation, or error handling
-* Adding tests for Spring services, controllers, or repositories
+src/main/resources
+ ├── application.yml
+ ├── application-dev.yml
+ ├── application-test.yml
+ ├── application-prod.yml
+ ├── db/migration
+ └── static
 
-When a change hits one of these areas:
-
-* Preserve local patterns in existing files
-* Apply the standards below only where they are safe and relevant
-* Avoid broad refactors unless the user explicitly asks for them
-
----
-
-# ⚠️ 3. Important Guidance for Copilot
-
-## How to apply rules
-
-* When modifying **existing code** → follow current patterns in that file/module
-* When creating **new code** → follow standards defined in this document
-* Do NOT refactor large legacy sections unless explicitly asked
-* Prefer consistency over correctness in legacy modules
-
----
-
-# 🧱 4. Architecture Rules
-
-## Required Flow
-
-```
-Controller → Service → Repository
+src/test/java
 ```
 
-## Rules
+### Structure Rules
 
-* Controllers handle HTTP only
-* Services contain business logic and transactions
-* Repositories handle persistence only
-* Do not bypass layers
-* Do not place business logic in controllers
-
----
-
-# 📁 5. File Placement Rules
-
-| Type            | Location     |
-| --------------- | ------------ |
-| Controller      | `controller` |
-| Service         | `service`    |
-| JPA Repository  | `repository` |
-| JDBC Repository | `jdbc`       |
-| DTO             | `dto`        |
-| Entity          | `entity`     |
-| Mapper          | `mapper`     |
-| Exception       | `exception`  |
+* Controllers handle HTTP transport only.
+* Services contain business logic and transaction boundaries.
+* Repositories handle persistence concerns only.
+* `jdbc` package contains JDBC/JdbcTemplate-based repositories and row mappers.
+* DTOs must not be used as JPA entities.
+* Entities must not be returned directly from controllers.
 
 ---
 
-# 🛢️ 6. Data Access Rules (JPA + JDBC)
+## 3. Architecture Guidelines
 
-## When to use JPA
+### Follow
 
-* CRUD operations
-* Aggregate-based domain models
-* Standard business workflows
+* Separation of concerns
+* Constructor-based dependency injection
+* Interface-driven design where it improves testability and clarity
+* SOLID principles
+* Clear request flow: `Controller → Service → Repository`
+* Domain logic isolated from transport and persistence logic
 
-## When to use JDBC
-
-* Complex SQL queries
-* Performance-critical reads
-* Reporting queries
-* Batch updates/inserts
-
-## JDBC Rules
-
-* Use `JdbcTemplate` or `NamedParameterJdbcTemplate`
-* Never concatenate SQL strings with user input
-* Use RowMapper classes for mapping
-* Keep SQL inside repository layer only
-
----
-
-# 🔄 7. Transaction Rules
-
-* Transactions must be defined in **service layer only**
-* Do NOT use `@Transactional` in controllers
-* Keep transactions short
-* Avoid remote calls inside transactions
-
----
-
-# 🌐 8. API Design Rules
-
-* Use REST conventions
-* Use versioned APIs (`/api/v1/...`)
-* Never expose entities directly
-* Always use DTOs
-* Validate inputs using `@Valid`
-
----
-
-# ⚠️ 9. Exception Handling
-
-* Use `@RestControllerAdvice`
-* Never expose stack traces
-* Use structured error responses
-* Use domain-specific exceptions
-
----
-
-# 🎯 10. Coding Standards
-
-## Required
-
-* Use constructor injection (avoid field injection)
-* Keep methods small and readable
-* Use meaningful names
-* Avoid static mutable state
-
-## Optional / Context-Based
-
-* Use Lombok carefully
-* Use `Optional` only for return types (not fields)
-
----
-
-# 🔐 11. Security Rules
-
-* Use Spring Security
-* Use JWT/OAuth2 if applicable
-* Validate all inputs
-* Do NOT hardcode secrets
-* Use HTTPS
-
----
-
-# ⚡ 12. Performance Rules
-
-* Avoid N+1 queries
-* Use pagination
-* Use caching only when necessary
-* Use connection pooling
-
----
-
-# 🧪 13. Testing Rules
-
-* Unit test business logic
-* Mock external dependencies
-* Use integration tests for DB and APIs
-* Keep tests deterministic
-
----
-
-# 🧠 14. Current vs Target State (Important)
-
-## Current Patterns (may exist)
-
-* Field injection in legacy code
-* Mixed layering in older modules
-* Inconsistent exception handling
-
-## Target Standards
-
-* Constructor injection
-* Clean layering
-* Centralized exception handling
-
-## Migration Guidance
-
-* Do NOT refactor legacy code unless asked
-* Apply new standards only to new code
-* Gradually improve high-impact modules
-
----
-
-# ❌ 15. Anti-Patterns to Avoid
+### Avoid
 
 * Business logic in controllers
-* Returning entities in APIs
+* Database access directly from controllers or services without repository abstraction
+* Circular dependencies
 * Field injection
-* String-based SQL concatenation
-* Tight coupling between layers
-* Large classes and methods
+* Returning entities directly in API responses
+* Leaking persistence concerns into API contracts
 
 ---
 
-# ✅ 16. Definition of Done
+## 4. Coding Standards
 
-* Code follows these instructions
-* Tests added where applicable
-* API contract maintained
-* No security issues introduced
-* Code compiles and passes CI
+### Naming Conventions
+
+| Component | Convention       | Example               |
+| --------- | ---------------- | --------------------- |
+| Class     | PascalCase       | `OrderService`        |
+| Method    | camelCase        | `calculateTotal()`    |
+| Variables | camelCase        | `orderAmount`         |
+| Constants | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`     |
+| Packages  | lowercase        | `com.company.project` |
+
+### Required Practices
+
+* Prefer constructor injection over field injection.
+* Keep methods small and intention-revealing.
+* Keep classes focused on a single responsibility.
+* Use enums instead of magic strings.
+* Avoid static mutable state.
+* Prefer immutable DTOs and value objects where practical.
+* Use Lombok selectively; do not hide important behavior with excessive annotations.
+* Prefer explicit code over clever code.
+
+### Null and Optional Usage
+
+* Do not return `null` from service or repository APIs unless clearly documented.
+* Use `Optional<T>` for return types where absence is valid.
+* Do not use `Optional` for entity fields, DTO fields, or method parameters.
+* Prefer empty collections over `null` collections.
 
 ---
-# 🧩 Final Instruction to Copilot
 
-Priority Rules:
+## 5. REST API Design Standards
 
-1. When modifying existing code:
-   - Preserve the existing local style, naming, and structure
-   - Do not introduce broad formatting or architectural changes unless asked
-   - Preserve behavior, public contracts, and transaction boundaries
+### HTTP Methods
 
-2. When generating new code:
-   - Follow this document as the default standard
-   - Use the current repository architecture and package conventions
-   - Prefer explicit, maintainable implementations over clever abstractions
+* `GET` — Fetch data
+* `POST` — Create
+* `PUT` — Full update
+* `PATCH` — Partial update
+* `DELETE` — Remove
 
-3. When the guidance conflicts:
+### URI Naming
 
-   - New-code standards apply only when they do not conflict with preserved behavior
+```text
+/api/v1/orders
+/api/v1/orders/{id}
+/api/v1/users/{userId}/orders
+```
 
-4. Never:
-   - Refactor large sections without instruction
-   - Introduce breaking architectural changes
-   - Change API contracts, transaction semantics, or persistence strategy unless explicitly requested
+### API Rules
+
+* Use nouns, not verbs, in resource paths.
+* Keep API versioning explicit where required by the organization.
+* Use consistent error response structure.
+* Do not expose internal entity structure directly.
+* Paginate list endpoints.
+* Support filtering and sorting for large collections where applicable.
+
+### Standard Success Response
+
+```json
+{
+  "timestamp": "2026-03-20T10:15:30Z",
+  "status": 200,
+  "message": "Success",
+  "data": {}
+}
+```
+
+### Validation
+
+Use Jakarta Bean Validation annotations such as:
+
+* `@Valid`
+* `@NotNull`
+* `@NotBlank`
+* `@Size`
+* `@Email`
+* `@Pattern`
+
+Validate at the API boundary.
+
+---
+
+## 6. Exception Handling
+
+* Use `@RestControllerAdvice` for centralized exception handling.
+* Define domain-specific exceptions.
+* Never expose stack traces or internal class names to API consumers.
+* Map exceptions to stable, documented error codes.
+* Log exceptions with enough context for troubleshooting.
+* Wrap low-level persistence or integration exceptions in meaningful business exceptions where appropriate.
+
+### Error Response Standard
+
+```json
+{
+  "timestamp": "2026-03-20T10:15:30Z",
+  "status": 400,
+  "error": "VALIDATION_ERROR",
+  "message": "Request validation failed",
+  "path": "/api/v1/orders"
+}
+```
+
+---
+
+## 7. Database Standards
+
+### Persistence Strategy
+
+Use the right persistence style for the use case:
+
+* **Spring Data JPA / Hibernate** for aggregate-oriented CRUD and relational mapping
+* **Spring JDBC / JdbcTemplate** for performance-sensitive queries, reporting queries, bulk operations, and SQL-heavy use cases
+
+### General Database Rules
+
+* Use database migrations with Flyway or Liquibase.
+* Keep schema changes versioned and reversible when feasible.
+* Index frequently queried columns.
+* Use transactions only where needed.
+* Keep write logic consistent and auditable.
+* Avoid N+1 query issues.
+* Use pagination for large result sets.
+
+---
+
+## 8. JPA / Hibernate Best Practices
+
+* Use Spring Data JPA for standard CRUD and aggregate persistence.
+* Use UUIDs or organization-approved identifier strategy.
+* Default relationships to `FetchType.LAZY` unless eager loading is justified.
+* Avoid bidirectional relationships unless clearly needed.
+* Use projections or dedicated read models for read-heavy queries.
+* Keep entity lifecycle logic minimal.
+* Do not put business workflows inside entities.
+* Avoid exposing JPA entities outside the service boundary.
+* Be explicit about transaction boundaries in service layer methods.
+
+### JPA Rules
+
+* Repositories should remain persistence-focused.
+* Do not place business logic in repository implementations.
+* Use `@EntityGraph`, fetch joins, or tailored queries to control loading.
+* Keep entity mappings simple and maintainable.
+
+---
+
+## 9. JDBC / JdbcTemplate Standards
+
+Use JDBC or `JdbcTemplate` when:
+
+* SQL needs tight control
+* Query performance is critical
+* You are building reporting/read-only endpoints
+* Bulk updates or batch writes are required
+* The mapping is simpler in SQL than in ORM
+
+### JDBC Best Practices
+
+* Prefer `JdbcTemplate` or `NamedParameterJdbcTemplate` over raw JDBC boilerplate.
+* Keep SQL in repository or `jdbc` package classes, not in services or controllers.
+* Use named parameters for readability and safety.
+* Use row mappers or result set extractors for clear mapping.
+* Keep SQL explicit and formatted.
+* Parameterize all queries; never concatenate user input into SQL.
+* Batch inserts/updates where appropriate.
+* Handle empty results explicitly.
+* Document complex SQL.
+
+### JDBC Package Example
+
+```text
+jdbc/
+ ├── OrderJdbcRepository.java
+ ├── mapper/
+ │    └── OrderRowMapper.java
+ └── sql/
+      └── order-queries.sql
+```
+
+### JDBC Rules
+
+* Services may call JDBC repositories the same way they call JPA repositories.
+* Do not mix transaction handling inside JDBC repository classes; transaction boundaries belong in services.
+* Prefer `NamedParameterJdbcTemplate` for non-trivial SQL.
+* Use JDBC for read-optimized flows and JPA for aggregate lifecycle, unless the service explicitly standardizes on JDBC.
+
+---
+
+## 10. Transaction Management
+
+* Define transaction boundaries at the service layer.
+* Use `@Transactional` on service methods, not controllers.
+* Keep transactions short-lived.
+* Use `readOnly = true` for read-only transactions where helpful.
+* Avoid remote calls inside active database transactions.
+* Be explicit about rollback behavior for checked exceptions if needed.
+
+---
+
+## 11. Security Best Practices
+
+* Use Spring Security.
+* Use OAuth2 / JWT where applicable.
+* Apply role-based or authority-based authorization.
+* Hash passwords with BCrypt or stronger approved algorithm.
+* Validate all inputs.
+* Enforce HTTPS.
+* Store secrets in environment variables or secret managers.
+* Implement rate limiting for sensitive/public endpoints.
+
+### Important Note
+
+* Enable CSRF protection for session/cookie-based applications.
+* For stateless token-based APIs, configure CSRF according to the security model rather than enabling it blindly.
+
+---
+
+## 12. Performance Optimization
+
+* Use connection pooling.
+* Monitor slow queries.
+* Avoid N+1 issues.
+* Use pagination.
+* Use caching only for clearly beneficial paths.
+* Use async processing for long-running tasks where appropriate.
+* Compress large HTTP responses where useful.
+* Profile before optimizing.
+
+---
+
+## 13. Testing Standards
+
+### Test Types
+
+* Unit Tests — JUnit 5
+* Mocking — Mockito
+* Integration Tests — Spring Boot Test
+* API Tests — MockMvc or TestRestTemplate
+* Persistence Tests — Testcontainers for database-backed tests
+
+### Testing Rules
+
+* Test business logic thoroughly.
+* Mock external systems in unit tests.
+* Use integration tests for repository, security, and controller wiring.
+* Keep tests deterministic and independent.
+* Follow Arrange–Act–Assert.
+* Name tests by behavior.
+
+### Coverage
+
+* Aim for meaningful coverage on business-critical paths.
+* Do not use a raw percentage target as the only quality gate.
+
+---
+
+## 14. Logging & Monitoring
+
+### Logging
+
+* Use SLF4J with Logback.
+* Use parameterized logging.
+* Use structured logging where supported.
+* Include correlation IDs and request tracing IDs.
+* Never log secrets, tokens, passwords, or sensitive personal data.
+
+### Monitoring
+
+* Use Spring Boot Actuator.
+* Expose health, metrics, and readiness endpoints appropriately.
+* Integrate with Prometheus/Grafana or equivalent tooling.
+
+---
+
+## 15. Build & Dependency Management
+
+* Keep dependency versions explicit or centrally managed.
+* Remove unused dependencies.
+* Scan dependencies for vulnerabilities.
+* Use multi-module builds only when justified by project complexity.
+* Align plugin versions with Java and Spring Boot versions.
+
+---
+
+## 16. Containerization
+
+* Use multi-stage Docker builds.
+* Use lightweight base images.
+* Do not run containers as root.
+* Externalize configuration.
+* Keep images small and reproducible.
+
+---
+
+## 17. CI/CD Best Practices
+
+* Run tests before packaging.
+* Enforce code quality gates.
+* Scan for vulnerabilities.
+* Automate versioning where appropriate.
+* Support zero-downtime rollout patterns when required.
+
+---
+
+## 18. Documentation Standards
+
+* Maintain OpenAPI documentation.
+* Keep README setup steps accurate.
+* Include architecture diagrams where useful.
+* Document integration points, environment variables, and local run instructions.
+* Keep docs aligned with code changes.
+
+---
+
+## 19. Java Standards
+
+### Language Level
+
+* Use Java 21+ features where they improve clarity and maintainability.
+* Prefer records for immutable DTOs where appropriate.
+* Use sealed classes only where they clearly model constrained hierarchies.
+* Prefer modern switch expressions where readable.
+
+### Object-Oriented Principles
+
+* Favor composition over inheritance.
+* Program to interfaces where it improves design.
+* Keep fields private.
+* Make invalid states hard to represent.
+
+### Collections and Streams
+
+* Use streams for readable transformations.
+* Avoid parallel streams unless performance-tested.
+* Choose collection types intentionally.
+* Prefer immutable collections for read-only data.
+
+### Exception Handling
+
+* Use runtime exceptions for programming and domain rule violations.
+* Use checked exceptions only when the caller is expected to recover explicitly.
+* Never swallow exceptions.
+* Always log exceptions with context.
+
+### Readability
+
+* Keep methods short.
+* Avoid deep nesting.
+* Limit method parameters; use parameter objects where appropriate.
+* Prefer self-documenting code and meaningful names.
+
+---
+
+## 20. Anti-Patterns
+
+* God classes
+* Tight coupling
+* Hardcoded configuration
+* Ignoring exceptions
+* Returning entities directly from controllers
+* Field injection
+* Database logic in controllers
+* Remote calls inside transactions
+* String-concatenated SQL
+* Blind use of JPA for every data access pattern
+
+---
+
+## 21. Definition of Done
+
+* Code follows project standards
+* Unit and integration tests added as appropriate
+* API changes documented
+* Logs and metrics considered
+* No critical vulnerabilities introduced
+* Code reviewed
+* CI pipeline passed
+* Database migrations included where needed
+* Docker image builds successfully
+* Deployment configuration updated if required
+
+```
+```
