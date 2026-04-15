@@ -1,515 +1,637 @@
+# Enterprise `agents.json` Schema
 
+This document describes a practical enterprise-grade schema for `agents.json` in this repository. It is designed for multi-agent orchestration, governed execution, reusable skills, and auditable outputs.
 
+## What This Schema Should Solve
 
-Claim offer
-i am creating the agents.json for a enterprise work flow suggest the  schemas for it with explaintation
+- Route requests to the right agent or workflow.
+- Break complex work into multiple steps.
+- Support planning, execution, review, and validation.
+- Enforce policies for security, compliance, and safety.
+- Capture traces, logs, and artifacts for later review.
 
-When you design an enterprise-grade agents.json, you’re essentially building a control plane for AI agents: orchestration, skills, tools, policies, workflows, and governance all in one place.
+## Recommended Top-Level Structure
 
-Below is a battle-tested schema design with explanation for each section.
-
-🧠 1. Top-Level agents.json Structure
+```json
 {
-"version": "1.0",
-"enterprise": {},
-"agents": [],
-"workflows": [],
-"skills": [],
-"tools": [],
-"policies": {},
-"observability": {},
-"security": {},
-"routing": {},
-"memory": {}
+  "version": "1.0",
+  "enterprise": {},
+  "environment": {},
+  "orchestration": {},
+  "agents": [],
+  "workflows": [],
+  "skills": [],
+  "tools": [],
+  "routing": {},
+  "policies": {},
+  "memory": {},
+  "observability": {},
+  "artifacts": {},
+  "versioning": {},
+  "featureFlags": {},
+  "costControls": {},
+  "defaults": {}
 }
-🧩 2. Core Schema Sections (Explanation)
-1. enterprise (Org Context Layer)
-   Purpose:
-   Defines global company-level configuration.
+```
 
-Example:
-"enterprise": {
-"name": "Acme Corp",
-"environment": "production",
-"region": "us-east-1",
-"compliance": ["GDPR", "SOC2"],
-"default_llm": "gpt-4.1"
-}
-Why it matters:
-Standardizes LLM usage
+## Enterprise Layer
 
-Enforces compliance globally
+The enterprise layer defines org-wide context and defaults.
 
-Helps multi-region deployments
-
-2. agents (Core AI Workers)
-   Purpose:
-   Defines individual AI agents.
-
-Schema:
+```json
 {
-"id": "string",
-"name": "string",
-"role": "string",
-"type": "planner | executor | reviewer | orchestrator",
-"model": "string",
-"skills": ["skill_id"],
-"tools": ["tool_id"],
-"memory_enabled": true,
-"input_schema": {},
-"output_schema": {},
-"handoff_to": ["agent_id"]
+  "enterprise": {
+    "name": "Acme Corp",
+    "domain": "software-engineering",
+    "region": "us-east-1",
+    "compliance": ["SOC2", "GDPR"],
+    "defaultModel": "gpt-5.2"
+  }
 }
-Example:
+```
+
+- What it does: stores shared organization-level metadata.
+- Why we need it: keeps the same runtime behavior across teams, projects, and environments.
+
+## Environment Layer
+
+The environment layer controls deployment-specific behavior.
+
+```json
 {
-"id": "code_migration_agent",
-"name": "Java Migration Agent",
-"role": "Migrates Spring Boot apps",
-"type": "executor",
-"model": "gpt-4.1",
-"skills": ["spring_migration", "dependency_analysis"],
-"tools": ["git_reader", "ast_parser"],
-"memory_enabled": true,
-"handoff_to": ["review_agent"]
+  "environment": {
+    "name": "prod",
+    "mode": "local | dev | staging | prod",
+    "region": "us-east-1",
+    "allowNetwork": false,
+    "logLevel": "info"
+  }
 }
-Why important:
-Enables multi-agent orchestration
+```
 
-Supports handoff workflows
+- What it does: defines where and how the agent system runs.
+- Why we need it: prevents dev-only settings from leaking into production.
 
-Separates responsibilities
+## Orchestration Layer
 
-3. workflows (Orchestration Engine)
-   Purpose:
-   Defines how agents collaborate.
+Orchestration defines how multiple agents work together.
 
-Schema:
+```json
 {
-"id": "string",
-"name": "string",
-"trigger": "event | api | schedule",
-"steps": [
+  "orchestration": {
+    "strategy": "sequential | parallel | hierarchical | hybrid | adaptive",
+    "dynamicAgents": true,
+    "allowDelegation": true,
+    "maxParallelAgents": 4,
+    "taskDistribution": "balanced | chunked | capability-based",
+    "aggregation": {
+      "mergeStrategy": "risk-priority | confidence-priority | last-write-wins",
+      "deduplicate": true
+    },
+    "fallback": {
+      "mode": "safe-stop | safe-continue | reroute",
+      "defaultWorkflowId": "safe-default-workflow"
+    }
+  }
+}
+```
+
+- What it does: controls scaling, delegation, and result aggregation.
+- Why we need it: makes multi-agent execution predictable instead of ad hoc.
+
+## Agent Schema
+
+Each agent should have one clear responsibility.
+
+```json
 {
-"agent": "agent_id",
-"action": "run | validate | enrich",
-"input": {},
-"depends_on": []
+  "id": "repo-analyzer",
+  "name": "Repository Analyzer",
+  "type": "analyzer | planner | executor | reviewer | orchestrator | router",
+  "role": "Inspects repository structure and identifies the task scope",
+  "model": "gpt-5.2",
+  "skills": ["repo-analysis", "dependency-analysis"],
+  "tools": ["filesystem", "git"],
+  "memoryEnabled": true,
+  "canDelegate": false,
+  "canSpawnAgents": false,
+  "constraints": {
+    "maxTokens": 8192,
+    "timeoutMs": 60000
+  }
 }
-],
-"failure_policy": "retry | escalate | abort"
-}
-Example:
+```
+
+- What it does: defines the capabilities and limits of a single agent.
+- Why we need it: prevents overlapping responsibilities and unclear handoffs.
+
+## Workflow Schema
+
+Workflows define multi-step execution.
+
+```json
 {
-"id": "migration_pipeline",
-"name": "Spring Migration Workflow",
-"trigger": "api",
-"steps": [
-{ "agent": "analyzer_agent", "action": "run" },
-{ "agent": "migration_agent", "action": "run", "depends_on": ["analyzer_agent"] },
-{ "agent": "review_agent", "action": "validate" }
-],
-"failure_policy": "escalate"
+  "id": "repo-change-workflow",
+  "name": "Repository Change Workflow",
+  "trigger": "api | event | manual | schedule",
+  "mode": "sequential | parallel | hybrid",
+  "ownerAgentId": "repo-analyzer",
+  "steps": [
+    {
+      "id": "analyze",
+      "type": "agent-call",
+      "agentId": "repo-analyzer",
+      "outputKey": "analysis"
+    },
+    {
+      "id": "implement",
+      "type": "agent-call",
+      "agentId": "implementation-agent",
+      "dependsOn": ["analyze"],
+      "input": {
+        "analysis": "{{analysis}}"
+      },
+      "outputKey": "changes"
+    },
+    {
+      "id": "review",
+      "type": "agent-call",
+      "agentId": "review-agent",
+      "dependsOn": ["implement"],
+      "input": {
+        "changes": "{{changes}}"
+      },
+      "outputKey": "review"
+    }
+  ],
+  "artifacts": {
+    "storeOutputs": true,
+    "path": ".agent/output",
+    "format": "json"
+  }
 }
-Why important:
-Defines agent orchestration graph
+```
 
-Supports DAG execution
+- What it does: turns a task into an explicit execution path.
+- Why we need it: makes the system auditable, testable, and recoverable.
 
-Enables CI/CD-like flows for AI
+## Step Schema
 
-4. skills (Reusable Capabilities Layer)
-   Purpose:
-   Reusable logic modules shared across agents.
+Steps should be small and deterministic.
 
-Schema:
+```json
 {
-"id": "string",
-"name": "string",
-"description": "string",
-"type": "analysis | transformation | generation",
-"input_contract": {},
-"output_contract": {},
-"implementation": "prompt | code | toolchain"
+  "id": "string",
+  "name": "string",
+  "type": "agent-call | action | tool-call | conditional | human-approval",
+  "agentId": "string",
+  "action": "string",
+  "toolId": "string",
+  "dependsOn": ["step-id"],
+  "condition": "string",
+  "input": {},
+  "outputKey": "string",
+  "retry": {
+    "maxAttempts": 3,
+    "backoffMs": 1000
+  },
+  "timeoutMs": 60000,
+  "onFailure": {
+    "strategy": "stop | continue | fallback | escalate",
+    "fallbackStepId": "string"
+  }
 }
-Example:
+```
+
+- What it does: defines one unit of work inside a workflow.
+- Why we need it: reduces complexity and isolates failures.
+
+## Strategy Schema
+
+Strategy selects the best workflow or agent based on project signals.
+
+```json
 {
-"id": "spring_migration",
-"name": "Spring Boot Migration Skill",
-"type": "transformation",
-"implementation": "ast_based_refactor_rules"
+  "id": "migration-strategy",
+  "name": "Migration Strategy",
+  "decisionEngine": {
+    "type": "rule-based | llm-based | hybrid",
+    "temperature": 0.1
+  },
+  "signals": ["repo.size", "repo.type", "tests.coverage", "risk.level"],
+  "rules": [
+    {
+      "if": "repo.hasMultipleModules == true",
+      "then": {
+        "workflowId": "multi-module-migration-workflow"
+      }
+    }
+  ],
+  "fallback": {
+    "workflowId": "safe-default-workflow",
+    "reason": "Use the safest path when confidence is low"
+  }
 }
-Why important:
-Avoids duplication across agents
+```
 
-Makes system modular
+- What it does: decides what should run before execution starts.
+- Why we need it: avoids hardcoding one path for every request.
 
-Enables skill reuse like microservices
+## Routing Schema
 
-5. tools (External Integrations)
-   Purpose:
-   Connect agents to real systems.
+Routing connects intent to the right agent or workflow.
 
-Schema:
+```json
 {
-"id": "string",
-"type": "api | db | filesystem | git | webhook",
-"name": "string",
-"config": {},
-"auth_type": "none | api_key | oauth | token",
-"endpoints": []
+  "strategy": "rule-based | confidence-based | llm-router | hybrid",
+  "defaultAgentId": "repo-analyzer",
+  "rules": [
+    {
+      "match": "review|verify|audit",
+      "targetAgentId": "review-agent",
+      "minConfidence": 0.8
+    }
+  ],
+  "askClarificationWhenUncertain": true
 }
-Example:
+```
+
+- What it does: sends requests to the right agent or workflow.
+- Why we need it: prevents wrong-agent execution and reduces user back-and-forth.
+
+## Skills Layer
+
+Skills are reusable knowledge modules shared by agents.
+
+```json
 {
-"id": "git_reader",
-"type": "filesystem",
-"name": "Git Repository Reader",
-"config": {
-"repo_url": "https://bitbucket.org/acme/app"
+  "id": "dependency-analysis",
+  "name": "Dependency Analysis",
+  "description": "Detects dependency issues and upgrade risks",
+  "type": "analysis | transformation | generation",
+  "implementation": "prompt | code | toolchain"
 }
-}
-Why important:
-Gives agents real-world power
+```
 
-Enables enterprise integration (Bitbucket, Jira, DBs)
+- What it does: packages reusable expertise for many agents.
+- Why we need it: avoids duplicating the same logic across agents.
 
-6. policies (Governance Layer)
-   Purpose:
-   Controls safety, compliance, and behavior.
+## Tools Layer
 
-Schema:
+Tools connect agents to real systems.
+
+```json
 {
-"data_policy": {},
-"llm_policy": {},
-"execution_policy": {},
-"security_policy": {}
+  "id": "filesystem",
+  "type": "filesystem | git | api | db | webhook",
+  "name": "Filesystem Access",
+  "authType": "none | api_key | oauth | token",
+  "config": {}
 }
-Example:
+```
+
+- What it does: gives agents access to files, repositories, APIs, and services.
+- Why we need it: makes the system operational, not just conversational.
+
+## Policies Layer
+
+Policies enforce safety and governance.
+
+```json
 {
-"llm_policy": {
-"allowed_models": ["gpt-4.1"],
-"no_external_api": false
-},
-"security_policy": {
-"mask_pii": true,
-"audit_logs": true
+  "security": {
+    "maskSecrets": true,
+    "allowExternalNetwork": false,
+    "auditAllActions": true
+  },
+  "compliance": {
+    "piiHandling": "mask | block | allow",
+    "retentionDays": 30,
+    "standards": ["SOC2", "GDPR"]
+  },
+  "execution": {
+    "requireApprovalForWrites": false,
+    "requireApprovalForDeletes": true,
+    "maxConcurrentSteps": 4
+  }
 }
-}
-Why important:
-Enterprise compliance (GDPR, SOC2)
+```
 
-Prevents unsafe agent actions
+- What it does: limits unsafe behavior and controls sensitive operations.
+- Why we need it: enterprise systems need guardrails, not just capabilities.
 
-7. routing (Intelligent Agent Selection)
-   Purpose:
-   Chooses which agent runs what.
+## Memory Layer
 
-Schema:
+Memory stores useful context across steps or sessions.
+
+```json
 {
-"strategy": "rule | ml | llm_router",
-"rules": [
+  "enabled": true,
+  "type": "short-term | long-term | vector-store | hybrid",
+  "provider": "redis | postgres | pinecone | local",
+  "retentionDays": 30,
+  "scope": "session | workflow | project | enterprise"
+}
+```
+
+- What it does: preserves context for later reasoning and reuse.
+- Why we need it: keeps multi-step work consistent and reduces repeated analysis.
+
+## Observability Layer
+
+Observability helps debug and audit the system.
+
+```json
 {
-"intent": "migration",
-"agent": "migration_agent"
+  "logging": true,
+  "tracing": true,
+  "metrics": ["latency", "cost", "success-rate", "step-failure-rate"],
+  "exporters": ["prometheus", "datadog"],
+  "redactSensitiveFields": true
 }
-]
-}
-Why important:
-Enables auto agent selection
+```
 
-Supports intent-based routing (like API gateway)
+- What it does: captures traces, metrics, and logs from execution.
+- Why we need it: helps explain failures and control runtime cost.
 
-8. memory (State + Knowledge Layer)
-   Purpose:
-   Defines persistence strategy.
+## Artifacts Layer
 
-Schema:
+Artifacts store outputs from execution.
+
+```json
 {
-"type": "short_term | long_term | vector_db",
-"provider": "pinecone | redis | postgres",
-"retention_days": 30
+  "store": true,
+  "basePath": ".agent/output",
+  "formats": ["json", "markdown", "txt"],
+  "includeTrace": true
 }
-Why important:
-Enables context-aware agents
+```
 
-Supports RAG + enterprise memory
+- What it does: keeps generated files and reports in a predictable location.
+- Why we need it: lets humans and downstream steps inspect results.
 
-9. observability (Monitoring Layer)
-   Purpose:
-   Tracks agent performance.
+## Versioning Layer
 
-Schema:
+Versioning makes the schema safe to evolve.
+
+```json
 {
-"logging": true,
-"metrics": ["latency", "cost", "accuracy"],
-"tracing": true,
-"export": ["datadog", "prometheus"]
+  "agents": "semver",
+  "workflows": "semver",
+  "schema": "semver",
+  "config": "git-sha"
 }
-Why important:
-Debug agent workflows
+```
 
-Cost optimization
+- What it does: tracks changes to agents, workflows, and config.
+- Why we need it: supports rollback and compatibility management.
 
-SLA tracking
+## Feature Flags
 
-🏗️ Advanced Enterprise Add-ons (Highly Recommended)
-1. Versioning
-   "versioning": {
-   "agents": "semver",
-   "workflows": "git_sha"
-   }
-2. Feature Flags
-   "feature_flags": {
-   "enable_parallel_agents": true
-   }
-3. Cost Control
-   "cost_controls": {
-   "max_tokens_per_request": 5000,
-   "budget_per_day": 100
-   }
-4. Multi-Agent Parallelism
-   "execution_mode": "sequential | parallel | hybrid"
-   🚀 Recommended Enterprise Architecture Pattern
-   Use this mental model:
+Feature flags let you roll out new behavior safely.
 
-ENTERPRISE LAYER
-↓
-ROUTING LAYER
-↓
-WORKFLOW ENGINE (DAG)
-↓
-AGENTS (planner/executor/reviewer)
-↓
-SKILLS (reusable logic)
-↓
-TOOLS (real-world systems)
-↓
-MEMORY + OBSERVABILITY
-💡 If you want next step (I can build it for you)
-I can generate any of these for your system:
-
-🔥 Option A
-✔ Full production-ready agents.json for:
-
-Java Spring Boot migration
-
-Bitbucket PR review
-
-Jira automation
-
-🔥 Option B
-✔ Multi-agent orchestration framework (like AutoGen / CrewAI style)
-
-🔥 Option C
-✔ IntelliJ Copilot Agent integration schema
- 
-========
-what are the other things i can add as part of schema in enterprise-grade.json
-
-Great question — this is exactly where you move from a “basic agent.json” → enterprise-grade AI orchestration platform schema.
-
-Below are the real production-level components you can add to an enterprise-grade.json for Copilot-style agents.
-
-🏗️ Enterprise-Grade Agent Schema (What you can add)
-
-Think of your system as 6 layers:
-
-1. Identity Layer
-2. Intelligence Layer
-3. Orchestration Layer
-4. Governance Layer
-5. Observability Layer
-6. Integration Layer
-   1️⃣ 🧠 Identity Layer (Who the agent is)
-   "identity": {
-   "name": "SpringBootMigrationAgent",
-   "version": "2.0",
-   "owner": "platform-team",
-   "domain": "backend-migration",
-   "tags": ["spring", "migration", "java", "enterprise"]
-   }
-
-✔ Helps classify agents across org
-✔ Useful for multi-agent ecosystems
-
-2️⃣ 🧠 Intelligence Layer (How it thinks)
-"intelligence": {
-"modelRouting": {
-"primary": "gpt-5.3",
-"fallback": "gpt-4.1-mini",
-"fallbackStrategy": "degrade-gracefully"
-},
-
-"reasoningMode": "chain-of-thought | react | plan-execute",
-
-"contextStrategy": {
-"chunking": "semantic | file-based",
-"maxTokens": 120000
-}
-}
-
-✔ Multi-model routing
-✔ Planning strategies
-✔ Context optimization for large repos
-
-3️⃣ ⚙️ Orchestration Layer (Execution Brain)
-
-This is where workflow + parallel agents live
-
-"orchestration": {
-"mode": "dag | sequential | parallel | hybrid",
-
-"workflows": [
-"springboot-migration-workflow",
-"security-upgrade-workflow"
-],
-
-"parallelExecution": true,
-
-"maxConcurrency": 5
-}
-
-✔ Supports DAG execution
-✔ Parallel micro-agents
-✔ Scalable execution engine
-
-4️⃣ 🧩 Governance Layer (VERY IMPORTANT in enterprise)
-
-This is what most basic agent systems miss.
-
-"governance": {
-"approvalRequired": true,
-
-"approvalRules": [
+```json
 {
-"condition": "changes.affectsProduction == true",
-"requires": "tech-lead-approval"
+  "enableParallelAgents": true,
+  "enableAdaptiveRouting": true,
+  "enableHumanApproval": true
 }
-],
+```
 
-"policyChecks": [
-"security-scan",
-"dependency-vulnerability-check",
-"license-compliance"
-],
+- What it does: toggles capabilities without changing the whole schema.
+- Why we need it: helps ship changes gradually and safely.
 
-"guardrails": {
-"blockSecretsExposure": true,
-"blockUnsafeCode": true,
-"blockProdDeletion": true
+## Cost Controls
+
+Cost controls prevent runaway execution.
+
+```json
+{
+  "maxTokensPerRequest": 5000,
+  "maxTokensPerWorkflow": 20000,
+  "budgetPerDay": 100
 }
+```
+
+- What it does: limits token usage and daily spend.
+- Why we need it: enterprise systems need predictable operating costs.
+
+## Defaults
+
+Defaults reduce repetition across the config.
+
+```json
+{
+  "model": "gpt-5.2",
+  "timeoutMs": 60000,
+  "retry": {
+    "maxAttempts": 3,
+    "backoffMs": 1000
+  }
 }
+```
 
-✔ Security + compliance layer
-✔ Human approval gates
-✔ Enterprise safety control
+- What it does: supplies shared fallback values for agents and workflows.
+- Why we need it: keeps the config smaller and more consistent.
 
-5️⃣ 📊 Observability Layer (Monitoring + Debugging)
-"observability": {
-"logging": {
-"level": "debug",
-"storeExecutionTrace": true
-},
+## Recommended Execution Model
 
-"metrics": [
-"execution-time",
-"token-usage",
-"success-rate",
-"failure-rate"
-],
+Use this order for most enterprise tasks:
 
-"tracing": {
-"enabled": true,
-"format": "open-telemetry"
-},
+1. Route the request.
+2. Run an analyzer or planner.
+3. Execute the workflow steps.
+4. Review the results.
+5. Store artifacts and traces.
 
-"auditTrail": {
-"enabled": true,
-"storeAllActions": true
+This structure works well for code review, migration, analysis, and documentation agents in this repository.
+
+## Recommended Example
+
+```json
+{
+  "version": "1.0",
+  "enterprise": {
+    "name": "Acme Corp",
+    "domain": "software-engineering",
+    "region": "us-east-1",
+    "compliance": ["SOC2", "GDPR"],
+    "defaultModel": "gpt-5.2"
+  },
+  "environment": {
+    "name": "prod",
+    "mode": "prod",
+    "region": "us-east-1",
+    "allowNetwork": false,
+    "logLevel": "info"
+  },
+  "orchestration": {
+    "strategy": "hierarchical",
+    "dynamicAgents": true,
+    "allowDelegation": true,
+    "maxParallelAgents": 4,
+    "taskDistribution": "capability-based"
+  },
+  "agents": [
+    {
+      "id": "repo-analyzer",
+      "name": "Repository Analyzer",
+      "type": "analyzer",
+      "role": "Inspects repository structure and identifies the task scope",
+      "model": "gpt-5.2",
+      "skills": ["repo-analysis"],
+      "tools": ["filesystem", "git"],
+      "memoryEnabled": true,
+      "canDelegate": false,
+      "canSpawnAgents": false
+    },
+    {
+      "id": "implementation-agent",
+      "name": "Implementation Agent",
+      "type": "executor",
+      "role": "Applies required code or configuration changes",
+      "model": "gpt-5.2",
+      "skills": ["code-editing"],
+      "tools": ["filesystem", "git"],
+      "memoryEnabled": true,
+      "canDelegate": false,
+      "canSpawnAgents": false
+    },
+    {
+      "id": "review-agent",
+      "name": "Review Agent",
+      "type": "reviewer",
+      "role": "Validates correctness, regressions, and quality",
+      "model": "gpt-5.2",
+      "skills": ["code-review"],
+      "tools": ["filesystem", "git"],
+      "memoryEnabled": true,
+      "canDelegate": false,
+      "canSpawnAgents": false
+    }
+  ],
+  "workflows": [
+    {
+      "id": "repo-change-workflow",
+      "name": "Repository Change Workflow",
+      "trigger": "api",
+      "mode": "hybrid",
+      "ownerAgentId": "repo-analyzer",
+      "steps": [
+        {
+          "id": "analyze",
+          "type": "agent-call",
+          "agentId": "repo-analyzer",
+          "outputKey": "analysis"
+        },
+        {
+          "id": "implement",
+          "type": "agent-call",
+          "agentId": "implementation-agent",
+          "dependsOn": ["analyze"],
+          "input": {
+            "analysis": "{{analysis}}"
+          },
+          "outputKey": "changes"
+        },
+        {
+          "id": "review",
+          "type": "agent-call",
+          "agentId": "review-agent",
+          "dependsOn": ["implement"],
+          "input": {
+            "changes": "{{changes}}"
+          },
+          "outputKey": "review"
+        }
+      ]
+    }
+  ],
+  "routing": {
+    "strategy": "hybrid",
+    "defaultAgentId": "repo-analyzer",
+    "rules": [
+      {
+        "match": "review|verify|audit",
+        "targetAgentId": "review-agent",
+        "minConfidence": 0.8
+      }
+    ],
+    "askClarificationWhenUncertain": true
+  },
+  "policies": {
+    "security": {
+      "maskSecrets": true,
+      "allowExternalNetwork": false,
+      "auditAllActions": true
+    },
+    "compliance": {
+      "piiHandling": "mask",
+      "retentionDays": 30,
+      "standards": ["SOC2", "GDPR"]
+    },
+    "execution": {
+      "requireApprovalForWrites": false,
+      "requireApprovalForDeletes": true,
+      "maxConcurrentSteps": 4
+    }
+  },
+  "memory": {
+    "enabled": true,
+    "type": "hybrid",
+    "provider": "postgres",
+    "retentionDays": 30,
+    "scope": "project"
+  },
+  "observability": {
+    "logging": true,
+    "tracing": true,
+    "metrics": ["latency", "cost", "success-rate"],
+    "exporters": ["prometheus", "datadog"],
+    "redactSensitiveFields": true
+  },
+  "artifacts": {
+    "store": true,
+    "basePath": ".agent/output",
+    "formats": ["json", "markdown"]
+  },
+  "versioning": {
+    "agents": "semver",
+    "workflows": "semver",
+    "schema": "semver",
+    "config": "git-sha"
+  },
+  "featureFlags": {
+    "enableParallelAgents": true,
+    "enableAdaptiveRouting": true,
+    "enableHumanApproval": true
+  },
+  "costControls": {
+    "maxTokensPerRequest": 5000,
+    "maxTokensPerWorkflow": 20000,
+    "budgetPerDay": 100
+  },
+  "defaults": {
+    "model": "gpt-5.2",
+    "timeoutMs": 60000,
+    "retry": {
+      "maxAttempts": 3,
+      "backoffMs": 1000
+    }
+  }
 }
-}
+```
 
-✔ Full traceability
-✔ Debug agent decisions
-✔ Audit logs for enterprise compliance
+## Summary
 
-6️⃣ 🔌 Integration Layer (Enterprise systems)
-"integration": {
-"git": {
-"provider": "bitbucket | github | gitlab",
-"autoPR": true
-},
+This schema gives you a strong enterprise baseline for this repo:
 
-"ciCd": {
-"tool": "jenkins | github-actions",
-"triggerOnSuccess": true
-},
+- clear org context
+- explicit orchestration
+- modular agents
+- multi-step workflows
+- routing and fallback
+- policies and guardrails
+- memory and observability
+- versioning, flags, and cost control
 
-"ticketing": {
-"system": "jira",
-"autoCreateTickets": true
-},
-
-"ide": {
-"intellij": true,
-"vscode": true
-}
-}
-
-✔ Connects agent to real SDLC
-✔ Auto PRs, Jira tickets, CI pipelines
-
-7️⃣ 🧪 Memory + Knowledge Layer
-"memory": {
-"type": "short-term | long-term | hybrid",
-"storage": "vector-db | file | redis",
-
-"retentionPolicy": {
-"days": 30,
-"compressAfterDays": 7
-}
-}
-
-✔ Keeps migration history
-✔ Learns from past fixes
-
-8️⃣ 🔄 Strategy + Workflow Hooks
-"decisionEngine": {
-"type": "llm + rules",
-
-"routing": {
-"simpleChange": "fast-workflow",
-"breakingChange": "safe-migration-workflow",
-"largeCodebase": "enterprise-parallel-workflow"
-}
-}
-
-✔ Smart routing between workflows
-
-9️⃣ 🧱 Plugin / Extension System
-"plugins": [
-"static-code-analyzer",
-"dependency-upgrader",
-"openapi-generator",
-"mermaid-diagram-generator"
-]
-
-✔ Extend agent without modifying core
-✔ Like “AI microservices”
-
-🔥 FULL ENTERPRISE VIEW
-STRATEGY ENGINE
-│
-▼
-ORCHESTRATION DAG
-│
-┌───────────────┼───────────────┐
-▼               ▼               ▼
-Code Fix Agent   Test Agent   Dependency Agent
-│               │               │
-└───────────────┼───────────────┘
-▼
-GOVERNANCE CHECKS
-▼
-OBSERVABILITY + AUDIT
-▼
-CI/CD + JIRA + GIT
