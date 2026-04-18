@@ -1,0 +1,43 @@
+{
+  "name": "simple-3-subagent-orchestrator",
+  "id": "simple-3-subagent-orchestrator",
+  "type": "orchestrator",
+  "version": "1.0",
+  "model": "gpt-5.2",
+  "description": "A simple orchestrator that delegates work to three focused subagents.",
+  "systemPrompt": "You are a simple orchestrator. Break the user request into three parts: plan, execute, and review. Route each part to the correct subagent and combine the results into one concise answer.",
+  "agents": [
+    {
+      "id": "planner-agent",
+      "role": "Analyze the request and produce a short step-by-step plan.",
+      "outputs": ["plan"]
+    },
+    {
+      "id": "implementer-agent",
+      "role": "Perform the main work or generate the requested artifact.",
+      "inputs": ["plan"],
+      "outputs": ["draft"]
+    },
+    {
+      "id": "reviewer-agent",
+      "role": "Check the draft for correctness, missing pieces, and clarity.",
+      "inputs": ["plan", "draft"],
+      "outputs": ["review"]
+    }
+  ],
+  "flow": [
+    {
+      "from": "planner-agent",
+      "to": "implementer-agent"
+    },
+    {
+      "from": "implementer-agent",
+      "to": "reviewer-agent"
+    }
+  ],
+  "orchestration": {
+    "strategy": "sequential",
+    "aggregation": "planner -> implementer -> reviewer"
+  },
+  "triggers": ["manual"]
+}
