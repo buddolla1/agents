@@ -25,6 +25,7 @@ This is the container for the full agent system.
   "domain": "string",
   "environment": "local | dev | staging | prod",
   "executionMode": "single-agent | multi-agent | orchestrated",
+  "discovery": {},
   "orchestration": {},
   "agents": [],
   "skills": [],
@@ -39,6 +40,71 @@ This is the container for the full agent system.
   "defaults": {}
 }
 ```
+
+## Discovery
+
+Use discovery to search repository files before any generation or workflow step.
+
+```json
+{
+  "discovery": {
+    "fileSearch": {
+      "include": [
+        "**/*.java",
+        "**/*.md",
+        "**/*.json",
+        "**/*.yml",
+        "**/*.yaml",
+        "src/main/resources/**"
+      ],
+      "exclude": [
+        "target/**",
+        "build/**",
+        "node_modules/**",
+        ".git/**"
+      ],
+      "priority": [
+        "src/main/resources/application.yaml",
+        "src/main/resources/application.yml",
+        "src/main/resources/bootstrap.yaml",
+        "src/main/resources/bootstrap.yml"
+      ]
+    },
+    "externalApiScan": {
+      "enabled": true,
+      "sourceFiles": [
+        "src/main/resources/application.yaml",
+        "src/main/resources/application.yml",
+        "src/main/resources/bootstrap.yaml",
+        "src/main/resources/bootstrap.yml"
+      ],
+      "matchKeys": [
+        "base-url",
+        "baseUrl",
+        "url",
+        "uri",
+        "endpoint",
+        "host",
+        "port",
+        "service",
+        "client",
+        "api",
+        "oauth",
+        "token",
+        "api-key"
+      ]
+    },
+    "outputContract": {
+      "format": "markdown",
+      "strict": true,
+      "preserveSourceFormat": true
+    }
+  }
+}
+```
+
+- What it does: tells the runtime exactly which files to search and which config files to inspect first.
+- Why we need it: reduces missed dependencies and keeps generated documents consistent.
 
 ## Orchestration
 
@@ -544,6 +610,24 @@ This is the reason this schema is a good fit here.
 - What it does: aligns the schema with the project’s current agent patterns.
 - Why we need it: avoids introducing a generic design that does not fit the repo.
 
+## Output Rules
+
+- Generate the final document in the same format that was requested.
+- Preserve the section order when a source format already exists.
+- Use Markdown for documentation outputs unless JSON is explicitly requested.
+- Include an `External APIs` section when config scanning finds outbound integrations.
+- If no external API exists, state that explicitly instead of omitting the section.
+
+## Recommended Execution Order
+
+1. Route the request.
+2. Run discovery across the repository.
+3. Scan `application.yaml` and related config for external APIs.
+4. Run a planner or analyzer.
+5. Execute workflow steps.
+6. Review the output.
+7. Persist artifacts.
+
 ## Summary
 
 - `orchestration` controls global execution behavior.
@@ -551,3 +635,4 @@ This is the reason this schema is a good fit here.
 - `workflows` define multi-step execution.
 - `routing` selects the right agent or workflow.
 - `policies`, `memory`, and `observability` make it enterprise-ready.
+- File discovery should be explicit, not inferred from vague prompts.

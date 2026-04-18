@@ -15,6 +15,7 @@ This document describes a practical enterprise-grade schema for `agents.json` in
 ```json
 {
   "version": "1.0",
+  "discovery": {},
   "enterprise": {},
   "environment": {},
   "orchestration": {},
@@ -71,6 +72,86 @@ The environment layer controls deployment-specific behavior.
 
 - What it does: defines where and how the agent system runs.
 - Why we need it: prevents dev-only settings from leaking into production.
+
+## Discovery Layer
+
+Discovery controls how the agent finds files, configs, and external dependencies before it generates any document or runs any workflow.
+
+```json
+{
+  "discovery": {
+    "fileSearch": {
+      "include": [
+        "**/*.java",
+        "**/*.md",
+        "**/*.json",
+        "**/*.yml",
+        "**/*.yaml",
+        "src/main/resources/**"
+      ],
+      "exclude": [
+        "target/**",
+        "build/**",
+        "node_modules/**",
+        ".git/**"
+      ],
+      "priority": [
+        "src/main/resources/application.yaml",
+        "src/main/resources/application.yml",
+        "src/main/resources/bootstrap.yaml",
+        "src/main/resources/bootstrap.yml"
+      ]
+    },
+    "externalApiScan": {
+      "enabled": true,
+      "sourceFiles": [
+        "src/main/resources/application.yaml",
+        "src/main/resources/application.yml",
+        "src/main/resources/bootstrap.yaml",
+        "src/main/resources/bootstrap.yml"
+      ],
+      "matchKeys": [
+        "base-url",
+        "baseUrl",
+        "url",
+        "uri",
+        "endpoint",
+        "host",
+        "port",
+        "service",
+        "client",
+        "api",
+        "oauth",
+        "token",
+        "api-key"
+      ],
+      "extract": [
+        "service names",
+        "external API base URLs",
+        "client identifiers",
+        "auth settings",
+        "feature flags that gate external calls"
+      ]
+    },
+    "outputContract": {
+      "format": "markdown",
+      "preserveSourceFormat": true,
+      "strictSectionOrder": true,
+      "requiredSections": [
+        "Overview",
+        "Discovered Files",
+        "External APIs",
+        "Workflow",
+        "Findings",
+        "Recommendations"
+      ]
+    }
+  }
+}
+```
+
+- What it does: makes file selection, config scanning, and output formatting explicit.
+- Why we need it: prevents missed files, missed APIs, and inconsistent generated documents.
 
 ## Orchestration Layer
 
@@ -293,6 +374,17 @@ Tools connect agents to real systems.
 - What it does: gives agents access to files, repositories, APIs, and services.
 - Why we need it: makes the system operational, not just conversational.
 
+## External API Discovery Rules
+
+When the task is documentation, analysis, or architecture generation, the agent should always inspect application configuration for outbound dependencies.
+
+- Scan `src/main/resources/application.yaml` first, then `application.yml`, then bootstrap variants.
+- Prefer explicit file reads over keyword-only search.
+- Extract every external API, service URL, and integration host defined in configuration.
+- Correlate config values with controllers, clients, SDKs, and HTTP adapters found elsewhere in the repository.
+- If an external API is present, include it in the document output under a dedicated `External APIs` section.
+- If no external API is found, state that explicitly instead of omitting the section.
+
 ## Policies Layer
 
 Policies enforce safety and governance.
@@ -439,12 +531,24 @@ Defaults reduce repetition across the config.
 Use this order for most enterprise tasks:
 
 1. Route the request.
-2. Run an analyzer or planner.
-3. Execute the workflow steps.
-4. Review the results.
-5. Store artifacts and traces.
+2. Run a file discovery pass.
+3. Scan configuration files for `application.yaml` and external APIs.
+4. Run an analyzer or planner.
+5. Execute the workflow steps.
+6. Review the results.
+7. Store artifacts and traces.
 
 This structure works well for code review, migration, analysis, and documentation agents in this repository.
+
+## Strict Output Rule
+
+All generated documents must preserve the requested output format.
+
+- If the input asks for Markdown, output Markdown only.
+- If the input asks for JSON, output JSON only.
+- If the input asks for a specific document structure, keep the same heading order and section names.
+- Do not mix formats unless the user explicitly requests a conversion.
+- If a source document already has a format convention, mirror that convention in the generated output.
 
 ## Recommended Example
 
@@ -634,4 +738,3 @@ This schema gives you a strong enterprise baseline for this repo:
 - policies and guardrails
 - memory and observability
 - versioning, flags, and cost control
-

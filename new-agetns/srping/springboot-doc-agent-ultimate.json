@@ -8,6 +8,52 @@
 
   "contextAwareness": {
     "scanProjectStructure": true,
+    "fileSearch": {
+      "include": [
+        "**/*.java",
+        "**/*.md",
+        "**/*.json",
+        "**/*.yml",
+        "**/*.yaml",
+        "src/main/resources/**"
+      ],
+      "exclude": [
+        "target/**",
+        "build/**",
+        "node_modules/**",
+        ".git/**"
+      ],
+      "priority": [
+        "src/main/resources/application.yaml",
+        "src/main/resources/application.yml",
+        "src/main/resources/bootstrap.yaml",
+        "src/main/resources/bootstrap.yml"
+      ]
+    },
+    "externalApiScan": {
+      "enabled": true,
+      "sourceFiles": [
+        "src/main/resources/application.yaml",
+        "src/main/resources/application.yml",
+        "src/main/resources/bootstrap.yaml",
+        "src/main/resources/bootstrap.yml"
+      ],
+      "matchKeys": [
+        "base-url",
+        "baseUrl",
+        "url",
+        "uri",
+        "endpoint",
+        "host",
+        "port",
+        "service",
+        "client",
+        "api",
+        "oauth",
+        "token",
+        "api-key"
+      ]
+    },
     "detectLayers": true,
     "detectControllers": true,
     "detectServices": true,
@@ -35,7 +81,9 @@
     "exportFormats": ["markdown", "html", "pdf", "confluence"],
     "autoTOC": true,
     "interactiveDocs": true,
-    "explainCodeSnippets": true
+    "explainCodeSnippets": true,
+    "strictFormat": true,
+    "preserveSourceFormat": true
   },
 
   "diagramCapabilities": {
@@ -181,6 +229,8 @@
     "includeDiagrams": true,
     "professionalTone": true,
     "verbosity": "adaptive",
-    "askQuestions": false
+    "askQuestions": false,
+    "sameFormatOnly": true,
+    "requireExternalApiSection": true
   }
 }

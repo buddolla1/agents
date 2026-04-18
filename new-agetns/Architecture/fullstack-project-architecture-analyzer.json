@@ -30,82 +30,183 @@
     "type": "file",
     "format": "markdown",
     "file_name": "Architecture.md",
-    "description": "Generated project architecture with diagrams and flowcharts"
+    "description": "Generated project architecture with diagrams and flowcharts",
+    "strict_format": true
   },
   "instructions": [
     {
       "role": "system",
-      "content": "You are an AI project architecture analyzer. Based on the selected project type, scan the project and generate architecture diagrams, component/module lists, and flowcharts. \n\n- For React projects: detect components, hooks, context, pages, services, and routes.\n- For Spring Boot projects: detect controllers, services, repositories, entities, DTOs, and REST endpoints.\n- For full-stack projects: combine React frontend and Spring Boot backend architecture, mapping API calls from frontend to backend."
+      "content": "You are an AI project architecture analyzer. Based on the selected project type, scan the project and generate architecture diagrams, component/module lists, and flowcharts.\n\nHard rules:\n- Search files explicitly and prioritize real source files over generated or build output.\n- Always inspect Spring configuration files first, especially src/main/resources/application.yaml, then application.yml, bootstrap.yaml, and bootstrap.yml.\n- Detect external APIs from Spring configuration and include them in a dedicated External APIs section.\n- Keep the generated document in the same format requested by the user. If Markdown is requested, output Markdown only.\n- Do not mix formats or emit JSON unless the user explicitly requests JSON.\n\n- For React projects: detect components, hooks, context, pages, services, and routes.\n- For Spring Boot projects: detect controllers, services, repositories, entities, DTOs, REST endpoints, and external API clients configured in application.yaml.\n- For full-stack projects: combine React frontend and Spring Boot backend architecture, mapping API calls from frontend to backend and external integrations from backend configuration."
     },
     {
       "role": "user",
-      "content": "Analyze the project and generate:\n1. HLD diagram\n2. LLD diagrams\n3. Flowcharts for main processes and user actions / API calls\n4. Component/module list with responsibilities\nOutput all in Markdown with Mermaid diagrams."
+      "content": "Analyze the project and generate:\n1. HLD diagram\n2. LLD diagrams\n3. Flowcharts for main processes, user actions, API calls, and external integrations\n4. Component/module list with responsibilities\n5. External APIs section when application.yaml or related config defines outbound services\nOutput all in Markdown with Mermaid diagrams. Preserve this exact output format."
     }
   ],
   "skills": [
     {
       "name": "project_scanner",
-      "description": "Recursively scans project files based on selected mode: React (.js/.jsx/.ts/.tsx), Spring Boot (.java, resources), or both."
+      "description": "Recursively scans project files based on selected mode: React (.js/.jsx/.ts/.tsx), Spring Boot (.java, resources), or both. Prioritize application.yaml and related config files."
     },
     {
       "name": "dependency_analyzer",
-      "description": "Analyzes relationships between components, hooks, context, services, controllers, repositories, and entities depending on project type."
+      "description": "Analyzes relationships between components, hooks, context, services, controllers, repositories, entities, and external API clients depending on project type."
     },
     {
       "name": "process_flow_extractor",
-      "description": "Identifies user actions, API flows, backend processes, database interactions, and state updates for flowcharts."
+      "description": "Identifies user actions, API flows, backend processes, database interactions, external integrations, and state updates for flowcharts."
     },
     {
       "name": "diagram_generator",
-      "description": "Generates Mermaid diagrams for HLD, LLD, and flowcharts tailored to project type."
+      "description": "Generates Mermaid diagrams for HLD, LLD, and flowcharts tailored to project type and output format."
     },
     {
       "name": "markdown_writer",
-      "description": "Writes all diagrams, flows, and components into Architecture.md"
+      "description": "Writes all diagrams, flows, components, and external API details into Architecture.md in Markdown only."
+    },
+    {
+      "name": "document_normalizer",
+      "description": "Normalizes findings into a fixed architecture document template, preserving section order and wording consistency across models."
     }
   ],
   "workflow": [
     {
       "step": "scan_project",
       "skill": "project_scanner",
-      "description": "Scan project files and detect components, hooks, pages, services, routes (React), or controllers, services, repositories, entities (Spring Boot)."
+      "description": "Scan project files and detect components, hooks, pages, services, routes (React), or controllers, services, repositories, entities, resources, and application.yaml external API settings (Spring Boot)."
     },
     {
       "step": "analyze_dependencies",
       "skill": "dependency_analyzer",
-      "description": "Map relationships between frontend and/or backend modules and services."
+      "description": "Map relationships between frontend and/or backend modules, external API clients, and services."
     },
     {
       "step": "extract_process_flows",
       "skill": "process_flow_extractor",
-      "description": "Detect user interactions, API calls, backend flows, and database operations."
+      "description": "Detect user interactions, API calls, backend flows, database operations, and external integrations."
     },
     {
       "step": "generate_diagrams",
       "skill": "diagram_generator",
-      "description": "Generate HLD, LLD, and flowcharts in Mermaid syntax, adjusted for selected project type."
+      "description": "Generate HLD, LLD, and flowcharts in Mermaid syntax, adjusted for selected project type, with external APIs shown when present."
+    },
+    {
+      "step": "normalize_output",
+      "skill": "document_normalizer",
+      "description": "Normalize findings into a canonical structure, enforce the exact section order, and remove model-specific wording differences."
     },
     {
       "step": "create_markdown",
       "skill": "markdown_writer",
-      "description": "Compile all diagrams, flows, and component/module details into Architecture.md."
+      "description": "Compile all diagrams, flows, component/module details, and external API findings into Architecture.md."
     }
   ],
   "settings": {
+    "determinism": {
+      "temperature": 0,
+      "top_p": 1,
+      "presence_penalty": 0,
+      "frequency_penalty": 0
+    },
     "mermaid_enabled": true,
     "generate_flowcharts": true,
     "include_component_details": true,
     "framework_mode": "react",
-    "scan_patterns": {
-      "react": ["src/**/*.{js,jsx,ts,tsx}", "components/**/*", "pages/**/*", "services/**/*", "hooks/**/*"],
-      "springboot": ["src/main/java/**/*.{java}", "src/main/resources/**/*"],
-      "fullstack": ["src/**/*.{js,jsx,ts,tsx}", "components/**/*", "pages/**/*", "services/**/*", "hooks/**/*", "src/main/java/**/*.{java}", "src/main/resources/**/*"]
+    "output_format": "markdown",
+    "strict_output_format": true,
+    "same_format_only": true,
+    "preserve_source_format": true,
+    "document_template": {
+      "section_order": [
+        "Project Overview",
+        "HLD",
+        "LLD",
+        "Flowcharts",
+        "Components",
+        "External APIs",
+        "Findings",
+        "Recommendations"
+      ],
+      "required_sections": [
+        "Project Overview",
+        "HLD",
+        "LLD",
+        "Flowcharts",
+        "Components",
+        "External APIs",
+        "Findings",
+        "Recommendations"
+      ],
+      "heading_style": "markdown",
+      "allow_section_reordering": false,
+      "allow_section_renaming": false
     },
-    "exclude_patterns": ["node_modules/**/*"]
+    "application_yaml_priority": [
+      "src/main/resources/application.yaml",
+      "src/main/resources/application.yml",
+      "src/main/resources/bootstrap.yaml",
+      "src/main/resources/bootstrap.yml"
+    ],
+    "external_api_keys": [
+      "base-url",
+      "baseUrl",
+      "url",
+      "uri",
+      "endpoint",
+      "host",
+      "port",
+      "service",
+      "client",
+      "api",
+      "oauth",
+      "token",
+      "api-key"
+    ],
+    "scan_patterns": {
+      "react": [
+        "src/**/*.{js,jsx,ts,tsx}",
+        "components/**/*",
+        "pages/**/*",
+        "services/**/*",
+        "hooks/**/*",
+        "public/**/*",
+        "package.json"
+      ],
+      "springboot": [
+        "src/main/java/**/*.java",
+        "src/main/resources/**/*",
+        "pom.xml",
+        "build.gradle",
+        "build.gradle.kts"
+      ],
+      "fullstack": [
+        "src/**/*.{js,jsx,ts,tsx}",
+        "components/**/*",
+        "pages/**/*",
+        "services/**/*",
+        "hooks/**/*",
+        "public/**/*",
+        "src/main/java/**/*.java",
+        "src/main/resources/**/*",
+        "package.json",
+        "pom.xml",
+        "build.gradle",
+        "build.gradle.kts"
+      ]
+    },
+    "exclude_patterns": [
+      "node_modules/**/*",
+      "dist/**/*",
+      "build/**/*",
+      "target/**/*",
+      ".git/**/*"
+    ]
   },
   "metadata": {
     "category": "project_analysis",
     "compatible_with": ["VS Code Copilot", "JetBrains Copilot"],
-    "output_preview": true
+    "output_preview": true,
+    "external_api_section_required": true,
+    "output_stability": "high"
   }
 }

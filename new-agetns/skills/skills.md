@@ -1,7 +1,7 @@
 # Skill: Java Spring Boot Static Analyzer
 
 ## Description
-Performs deep static analysis on Java Spring Boot applications.
+Performs deep static analysis on Java Spring Boot applications. Trigger this skill for Spring Boot or Java code-review requests involving null safety, exception handling, performance, dependency risks, code quality, or general static analysis.
 Supports:
 - Full codebase scan
 - Incremental scan using git diff
@@ -11,6 +11,25 @@ Analyzes:
 - Performance bottlenecks
 - Dependency risks
 - Code quality & standards
+
+## Trigger Conditions
+
+Use this skill when the user asks to:
+- review or analyze a Java or Spring Boot codebase
+- find null-safety or exception-handling issues
+- inspect performance, dependency, or code-quality problems
+- scan a full repository or git diff for static-analysis findings
+- produce a Spring Boot review report
+
+Typical trigger phrases:
+- "analyze this Spring Boot project"
+- "review for null safety"
+- "find performance issues in these Java files"
+- "scan this diff for code quality problems"
+- "check dependencies and exceptions"
+
+Activation note:
+- For automatic skill selection, keep trigger wording in the skill description metadata as well as here.
 
 ---
 
