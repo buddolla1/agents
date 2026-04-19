@@ -1,0 +1,115 @@
+{
+  "name": "engineering-design-agent",
+  "description": "Transforms feature.txt into an enterprise-grade delivery plan with epics, stories, dependencies, BDD, Gherkin scenarios, estimates, architecture, and diagrams",
+  "version": "5.1",
+
+  "systemPrompt": "You are a principal software architect with 15+ years of experience. Read the provided feature.txt content and, if the sizing inputs are missing, ask the user for three values before proceeding: number of epics, number of user stories per epic, and number of tasks per story. Once the inputs are available, analyze the feature and produce a polished enterprise delivery document. The document must include an executive summary, assumptions, scope boundaries, epics, story breakdown, dependency matrix, BDD coverage, Gherkin scenarios, estimate points, test data, HLD, LLD, and Mermaid diagrams. Use concise, formal language and present the output as a professional markdown artifact suitable for product, engineering, and QA review.",
+
+  "actions": [
+    {
+      "name": "generate-full-design",
+      "description": "Generate a professional feature breakdown and engineering delivery document",
+      "input": {
+        "type": "object",
+        "properties": {
+          "featureFile": {
+            "type": "string",
+            "description": "Raw contents of feature.txt to analyze"
+          },
+          "epicCount": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Requested number of epics"
+          },
+          "storiesPerEpic": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Requested number of user stories per epic"
+          },
+          "tasksPerStory": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Requested number of tasks per story"
+          },
+          "requirement": { "type": "string" },
+          "techStack": { "type": "array", "items": { "type": "string" } },
+          "architectureType": { "type": "string" },
+          "includeEstimates": {
+            "type": "boolean",
+            "description": "Whether to include estimate points for stories"
+          },
+          "includeDependencies": {
+            "type": "boolean",
+            "description": "Whether to include epic and story dependencies"
+          },
+          "includeGherkin": {
+            "type": "boolean",
+            "description": "Whether to include Gherkin scenarios"
+          }
+        },
+        "required": ["featureFile", "epicCount", "storiesPerEpic", "tasksPerStory"]
+      },
+      "output": {
+        "type": "string",
+        "format": "markdown"
+      }
+    }
+  ],
+
+  "design": {
+    "hld": true,
+    "lld": true,
+    "diagrams": [
+      "flowchart",
+      "sequence",
+      "component"
+    ],
+    "format": "mermaid"
+  },
+
+  "bdd": {
+    "enabled": true
+  },
+
+  "planning": {
+    "epics": true,
+    "stories": true,
+    "tasks": true,
+    "dependencies": true,
+    "gherkinScenarios": true,
+    "estimatePoints": true,
+    "assumptions": true,
+    "scopeBoundaries": true
+  },
+
+  "testData": {
+    "enabled": true
+  },
+
+  "outputFormat": {
+    "type": "markdown",
+    "sections": [
+      "cover-page",
+      "feature-summary",
+      "executive-summary",
+      "assumptions",
+      "scope",
+      "epics",
+      "story-breakdown",
+      "dependencies",
+      "dependency-matrix",
+      "stories",
+      "bdd",
+      "gherkin-scenarios",
+      "estimate-points",
+      "test-strategy",
+      "test-data",
+      "architecture-overview",
+      "hld",
+      "lld",
+      "diagrams",
+      "risks",
+      "next-steps"
+    ]
+  }
+}
